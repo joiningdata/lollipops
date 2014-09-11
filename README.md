@@ -15,4 +15,4 @@ Example
 
 Results in the following SVG image:
 
-![TP53 Lollipop diagram with 3 marked mutations](tp53.svg?raw=true)
+![TP53 Lollipop diagram with 3 marked mutations](tp53.png?raw=true)
