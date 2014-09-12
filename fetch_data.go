@@ -26,6 +26,7 @@ type PfamGraphicFeature struct {
 	StartStyle    string              `json:"startStyle"`
 	EndStyle      string              `json:"endStyle"`
 	Text          string              `json:"text"`
+	Type          string              `json:"type"`
 	Start         json.Number         `json:"start"`
 	End           json.Number         `json:"end"`
 	ShouldDisplay bool                `json:"display"`

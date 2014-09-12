@@ -12,6 +12,7 @@ const (
 	LollipopRadius = 5
 	LollipopHeight = 28
 	BackboneHeight = 14
+	MotifHeight    = 18
 	DomainHeight   = 24
 	Padding        = 15
 	GraphicHeight  = LollipopRadius + LollipopHeight + BackboneHeight + DomainHeight + Padding*2
@@ -35,6 +36,14 @@ const svgHeader = `<?xml version='1.0'?>
 const svgFooter = `</svg>`
 
 var stripChangePos = regexp.MustCompile("[A-Z][a-z]*([0-9]+)")
+
+// BlendColorStrings blends two CSS #RRGGBB colors together with a straight average.
+func BlendColorStrings(a, b string) string {
+	var r1, g1, b1, r2, g2, b2 int
+	fmt.Sscanf(strings.ToUpper(a), "#%02X%02X%02X", &r1, &g1, &b1)
+	fmt.Sscanf(strings.ToUpper(b), "#%02X%02X%02X", &r2, &g2, &b2)
+	return fmt.Sprintf("#%02X%02X%02X", (r1+r2)/2, (g1+g2)/2, (b1+b2)/2)
+}
 
 func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicResponse) {
 	ht := GraphicHeight
@@ -68,6 +77,20 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 	fmt.Fprintf(w, `<a xlink:title="%s, %s (%daa)"><rect fill="#BABDB6" x="%d" y="%d" width="%d" height="%d"/></a>`,
 		g.Metadata.Identifier, g.Metadata.Description, aaLen,
 		Padding, startY+(DomainHeight-BackboneHeight)/2, GraphicWidth-(Padding*2), BackboneHeight)
+
+	// draw transmembrane, signal peptide, coiled-coil, etc motifs
+	for _, r := range g.Motifs {
+		sstart, _ := r.Start.Float64()
+		swidth, _ := r.End.Float64()
+
+		sstart *= scale
+		swidth = (swidth * scale) - sstart
+
+		fmt.Fprintf(w, `<a xlink:title="%s">`, r.Type)
+		fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%d" width="%f" height="%d" filter="url(#ds)"/>`, BlendColorStrings(r.Color, "#FFFFFF"),
+			Padding+sstart, startY+(DomainHeight-MotifHeight)/2, swidth, MotifHeight)
+		fmt.Fprintln(w, `</a>`)
+	}
 
 	// draw the curated domains
 	for _, r := range g.Regions {
