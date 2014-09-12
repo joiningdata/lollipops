@@ -12,15 +12,21 @@ var (
 )
 
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] -o out.svg GENE_SYMBOL [PROTEIN CHANGES ...]\n\n", os.Args[0])
+		fmt.Fprintln(os.Stderr, "Where options are:")
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 	if *output == "" || flag.NArg() == 0 {
-		fmt.Fprintf(os.Stderr, "Usage: %s [-w 500] -o out.svg GENE_SYMBOL [CHANGE1 CHANGE2 ...]\n", os.Args[0])
-		return
+		flag.Usage()
+		os.Exit(1)
 	}
 
 	f, err := os.OpenFile(*output, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 	defer f.Close()
 
@@ -28,14 +34,17 @@ func main() {
 
 	acc, err := GetProtID(flag.Arg(0))
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 	fmt.Fprintln(os.Stderr, "Uniprot/SwissProt Accession: ", acc)
 
 	data, err := GetPfamGraphicData(acc)
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
+	fmt.Fprintln(os.Stderr, "Drawing diagram to", *output)
 	DrawSVG(f, *width, flag.Args()[1:], data)
 }
