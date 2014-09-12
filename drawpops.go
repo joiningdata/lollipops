@@ -13,7 +13,7 @@ import (
 var (
 	hideDisordered = flag.Bool("hide-disordered", false, "do not draw disordered regions")
 	hideMotifs     = flag.Bool("hide-motifs", false, "do not draw motifs")
-	hideAxis       = flag.Bool("hide-axis", false, "do not the aa position axis")
+	hideAxis       = flag.Bool("hide-axis", false, "do not draw the aa position axis")
 )
 
 const (
