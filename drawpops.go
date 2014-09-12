@@ -1,11 +1,17 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"regexp"
 	"strings"
 	"unicode"
+)
+
+var (
+	hideDisordered = flag.Bool("hide-disordered", false, "do not draw disordered regions")
+	hideMotifs     = flag.Bool("hide-motifs", false, "do not draw motifs")
 )
 
 const (
@@ -79,24 +85,29 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 		g.Metadata.Identifier, g.Metadata.Description, aaLen,
 		Padding, startY+(DomainHeight-BackboneHeight)/2, GraphicWidth-(Padding*2), BackboneHeight)
 
-	// draw transmembrane, signal peptide, coiled-coil, etc motifs
-	for _, r := range g.Motifs {
-		sstart, _ := r.Start.Float64()
-		swidth, _ := r.End.Float64()
+	if !*hideMotifs {
+		// draw transmembrane, signal peptide, coiled-coil, etc motifs
+		for _, r := range g.Motifs {
+			if r.Type == "disorder" && *hideDisordered {
+				continue
+			}
+			sstart, _ := r.Start.Float64()
+			swidth, _ := r.End.Float64()
 
-		sstart *= scale
-		swidth = (swidth * scale) - sstart
+			sstart *= scale
+			swidth = (swidth * scale) - sstart
 
-		fmt.Fprintf(w, `<a xlink:title="%s">`, r.Type)
-		if r.Type == "disorder" {
-			// draw disordered regions with a understated diagonal hatch pattern
-			fmt.Fprintf(w, `<rect fill="url(#hatch)" x="%f" y="%d" width="%f" height="%d"/>`,
-				Padding+sstart, startY+(DomainHeight-BackboneHeight)/2, swidth, BackboneHeight)
-		} else {
-			fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%d" width="%f" height="%d" filter="url(#ds)"/>`, BlendColorStrings(r.Color, "#FFFFFF"),
-				Padding+sstart, startY+(DomainHeight-MotifHeight)/2, swidth, MotifHeight)
+			fmt.Fprintf(w, `<a xlink:title="%s">`, r.Type)
+			if r.Type == "disorder" {
+				// draw disordered regions with a understated diagonal hatch pattern
+				fmt.Fprintf(w, `<rect fill="url(#hatch)" x="%f" y="%d" width="%f" height="%d"/>`,
+					Padding+sstart, startY+(DomainHeight-BackboneHeight)/2, swidth, BackboneHeight)
+			} else {
+				fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%d" width="%f" height="%d" filter="url(#ds)"/>`, BlendColorStrings(r.Color, "#FFFFFF"),
+					Padding+sstart, startY+(DomainHeight-MotifHeight)/2, swidth, MotifHeight)
+			}
+			fmt.Fprintln(w, `</a>`)
 		}
-		fmt.Fprintln(w, `</a>`)
 	}
 
 	// draw the curated domains
