@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -12,6 +13,7 @@ import (
 var (
 	hideDisordered = flag.Bool("hide-disordered", false, "do not draw disordered regions")
 	hideMotifs     = flag.Bool("hide-motifs", false, "do not draw motifs")
+	hideAxis       = flag.Bool("hide-axis", false, "do not the aa position axis")
 )
 
 const (
@@ -21,7 +23,9 @@ const (
 	MotifHeight    = 18
 	DomainHeight   = 24
 	Padding        = 15
-	GraphicHeight  = LollipopRadius + LollipopHeight + BackboneHeight + DomainHeight + Padding*2
+	AxisPadding    = 10
+	AxisHeight     = 15
+	GraphicHeight  = LollipopRadius + LollipopHeight + DomainHeight + AxisPadding + AxisHeight + Padding*2
 	//GraphicWidth   = 740
 )
 
@@ -38,9 +42,42 @@ const svgHeader = `<?xml version='1.0'?>
     <path d="M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2" stroke="#000000" opacity="0.3" />
   </pattern>
 </defs>
-<style>text{font-size:12px;font-family:sans-serif;fill:#ffffff;}</style>
+<style>
+text{font-size:12px;font-family:sans-serif;fill:#ffffff;}
+.axis text{font-size:10px;font-family:sans-serif;fill:#000000;}
+</style>
 `
 const svgFooter = `</svg>`
+
+type Tick struct {
+	Pos int
+	Pri int
+}
+
+type TickSlice []Tick
+
+func (t TickSlice) NextBetter(i, maxDist int) int {
+	for j := i; j < len(t); j++ {
+		if (t[j].Pos - t[i].Pos) > maxDist {
+			return i
+		}
+		if t[j].Pri > t[i].Pri {
+			return j
+		}
+	}
+	return i
+}
+
+// implement sort interface
+func (t TickSlice) Len() int      { return len(t) }
+func (t TickSlice) Swap(i, j int) { t[i], t[j] = t[j], t[i] }
+func (t TickSlice) Less(i, j int) bool {
+	if t[i].Pos == t[j].Pos {
+		// sort high-priority first if same
+		return t[i].Pri > t[j].Pri
+	}
+	return t[i].Pos < t[j].Pos
+}
 
 var stripChangePos = regexp.MustCompile("[A-Z][a-z]*([0-9]+)")
 
@@ -57,10 +94,18 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 	if len(changelist) == 0 {
 		ht -= LollipopHeight
 	}
+	if *hideAxis {
+		ht -= AxisPadding + AxisHeight
+	}
 	fmt.Fprintf(w, svgHeader, GraphicWidth, GraphicHeight)
 
 	aaLen, _ := g.Length.Int64()
 	scale := float64(GraphicWidth-Padding*2) / float64(aaLen)
+
+	ticks := []Tick{
+		Tick{0, 0},           // start isn't very important (0 is implied)
+		Tick{int(aaLen), 99}, // always draw the length in the axis
+	}
 
 	startY := Padding
 	if len(changelist) > 0 {
@@ -73,6 +118,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 			cpos := stripChangePos.FindStringSubmatch(chg)
 			spos := 0.0
 			fmt.Sscanf(cpos[1], "%f", &spos)
+			ticks = append(ticks, Tick{int(spos), 10})
 			spos = Padding + (spos * scale)
 
 			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%d" y2="%d" stroke="#BABDB6" stroke-width="3"/>`, spos, spos, poptop, popbot)
@@ -105,6 +151,11 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 			} else {
 				fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%d" width="%f" height="%d" filter="url(#ds)"/>`, BlendColorStrings(r.Color, "#FFFFFF"),
 					Padding+sstart, startY+(DomainHeight-MotifHeight)/2, swidth, MotifHeight)
+
+				tstart, _ := r.Start.Int64()
+				tend, _ := r.End.Int64()
+				ticks = append(ticks, Tick{int(tstart), 1})
+				ticks = append(ticks, Tick{int(tend), 1})
 			}
 			fmt.Fprintln(w, `</a>`)
 		}
@@ -114,6 +165,9 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 	for _, r := range g.Regions {
 		sstart, _ := r.Start.Float64()
 		swidth, _ := r.End.Float64()
+
+		ticks = append(ticks, Tick{int(sstart), 5})
+		ticks = append(ticks, Tick{int(swidth), 5})
 
 		sstart *= scale
 		swidth = (swidth * scale) - sstart
@@ -162,6 +216,33 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 			}
 		}
 		fmt.Fprintln(w, `</a></g>`)
+	}
+
+	if !*hideAxis {
+		startY += DomainHeight + AxisPadding
+		fmt.Fprintln(w, `<g class="axis">`)
+		fmt.Fprintf(w, `<line x1="%d" x2="%d" y1="%d" y2="%d" stroke="#AAAAAA" />`, Padding, GraphicWidth-Padding, startY, startY)
+		fmt.Fprintf(w, `<line x1="%d" x2="%d" y1="%d" y2="%d" stroke="#AAAAAA" />`, Padding, Padding, startY, startY+(AxisHeight/3))
+
+		aaSpace := int(20 / scale)
+		ts := TickSlice(ticks)
+		sort.Sort(ts)
+		lastDrawn := 0
+		for i, t := range ts {
+			if lastDrawn > 0 && (t.Pos-lastDrawn) < aaSpace {
+				continue
+			}
+			j := ts.NextBetter(i, aaSpace)
+			if i != j {
+				continue
+			}
+			lastDrawn = t.Pos
+			x := Padding + (float64(t.Pos) * scale)
+			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%d" y2="%d" stroke="#AAAAAA" />`, x, x, startY, startY+(AxisHeight/3))
+			fmt.Fprintf(w, `<text text-anchor="middle" x="%f" y="%d">%d</text>`, x, startY+AxisHeight, t.Pos)
+		}
+
+		fmt.Fprintln(w, "</g>")
 	}
 
 	fmt.Fprintln(w, svgFooter)
