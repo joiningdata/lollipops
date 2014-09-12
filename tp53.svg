@@ -1,7 +1,17 @@
 <?xml version='1.0'?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="101">
+<defs>
+    <filter id="ds" x="0" y="0">
+      <feOffset in="SourceAlpha" dx="2" dy="2" />
+      <feComponentTransfer>
+	    <feFuncA type="linear" slope="0.2"/>
+	  </feComponentTransfer>
+      <feGaussianBlur result="blurOut" stdDeviation="1" />
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+    </filter>
+  </defs>
 <style>text{font-size:12px;font-family:sans-serif;fill:#ffffff;}</style>
-<line x1="374.694656" x2="374.694656" y1="20" y2="48" stroke="#BABDB6" stroke-width="3"/><a xlink:title="R248Q"><circle cx="374.694656" cy="20" r="5" fill="#FF5555" /></a><line x1="410.954198" x2="410.954198" y1="20" y2="48" stroke="#BABDB6" stroke-width="3"/><a xlink:title="R273C"><circle cx="410.954198" cy="20" r="5" fill="#FF5555" /></a><line x1="376.145038" x2="376.145038" y1="20" y2="48" stroke="#BABDB6" stroke-width="3"/><a xlink:title="R249S"><circle cx="376.145038" cy="20" r="5" fill="#FF5555" /></a><a xlink:title="P53_HUMAN, Cellular tumor antigen p53 (393aa)"><rect fill="#BABDB6" x="15" y="48" width="570" height="14"/></a><g transform="translate(22.251908,43)"><a xlink:href="http://pfam.xfam.org/family/PF08563" xlink:title="P53 transactivation motif"><rect fill="#2dcf00" x="0" y="0" width="34.809160" height="24" /></a></g>
-<g transform="translate(152.786260,43)"><a xlink:href="http://pfam.xfam.org/family/PF00870" xlink:title="P53 DNA-binding domain"><rect fill="#ff5353" x="0" y="0" width="281.374046" height="24" /><text text-anchor="middle" x="140.687023" y="16">P53 DNA-binding domain</text></a></g>
-<g transform="translate(476.221374,43)"><a xlink:href="http://pfam.xfam.org/family/PF07710" xlink:title="P53 tetramerisation motif"><rect fill="#5b5bff" x="0" y="0" width="59.465649" height="24" /><text text-anchor="middle" x="29.732824" y="16">P53..</text></a></g>
+<line x1="374.694656" x2="374.694656" y1="20" y2="48" stroke="#BABDB6" stroke-width="3"/><a xlink:title="R248Q"><circle cx="374.694656" cy="20" r="5" fill="#FF5555" /></a><line x1="410.954198" x2="410.954198" y1="20" y2="48" stroke="#BABDB6" stroke-width="3"/><a xlink:title="R273C"><circle cx="410.954198" cy="20" r="5" fill="#FF5555" /></a><line x1="376.145038" x2="376.145038" y1="20" y2="48" stroke="#BABDB6" stroke-width="3"/><a xlink:title="R249S"><circle cx="376.145038" cy="20" r="5" fill="#FF5555" /></a><a xlink:title="P53_HUMAN, Cellular tumor antigen p53 (393aa)"><rect fill="#BABDB6" x="15" y="48" width="570" height="14"/></a><g transform="translate(22.251908,43)"><a xlink:href="http://pfam.xfam.org/family/PF08563" xlink:title="P53 transactivation motif"><rect fill="#2dcf00" x="0" y="0" width="34.809160" height="24" filter="url(#ds)"/></a></g>
+<g transform="translate(152.786260,43)"><a xlink:href="http://pfam.xfam.org/family/PF00870" xlink:title="P53 DNA-binding domain"><rect fill="#ff5353" x="0" y="0" width="281.374046" height="24" filter="url(#ds)"/><text text-anchor="middle" x="140.687023" y="16">P53 DNA-binding domain</text></a></g>
+<g transform="translate(476.221374,43)"><a xlink:href="http://pfam.xfam.org/family/PF07710" xlink:title="P53 tetramerisation motif"><rect fill="#5b5bff" x="0" y="0" width="59.465649" height="24" filter="url(#ds)"/><text text-anchor="middle" x="29.732824" y="16">P53..</text></a></g>
 </svg>

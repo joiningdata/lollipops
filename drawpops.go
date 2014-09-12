@@ -20,6 +20,16 @@ const (
 
 const svgHeader = `<?xml version='1.0'?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="%d" height="%d">
+<defs>
+    <filter id="ds" x="0" y="0">
+      <feOffset in="SourceAlpha" dx="2" dy="2" />
+      <feComponentTransfer>
+	    <feFuncA type="linear" slope="0.2"/>
+	  </feComponentTransfer>
+      <feGaussianBlur result="blurOut" stdDeviation="1" />
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+    </filter>
+  </defs>
 <style>text{font-size:12px;font-family:sans-serif;fill:#ffffff;}</style>
 `
 const svgFooter = `</svg>`
@@ -68,7 +78,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 		swidth = (swidth * scale) - sstart
 
 		fmt.Fprintf(w, `<g transform="translate(%f,%d)"><a xlink:href="%s" xlink:title="%s">`, Padding+sstart, startY, "http://pfam.xfam.org"+r.Link, r.Metadata.Description)
-		fmt.Fprintf(w, `<rect fill="%s" x="0" y="0" width="%f" height="%d" />`, r.Color, swidth, DomainHeight)
+		fmt.Fprintf(w, `<rect fill="%s" x="0" y="0" width="%f" height="%d" filter="url(#ds)"/>`, r.Color, swidth, DomainHeight)
 		if swidth > 40 {
 			if len(r.Metadata.Description) > 1 && float64(len(r.Metadata.Description))*10 < swidth {
 				// we can fit the full description! nice!
