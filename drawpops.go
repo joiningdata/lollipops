@@ -17,7 +17,7 @@ var (
 )
 
 const (
-	LollipopRadius = 5
+	LollipopRadius = 4
 	LollipopHeight = 28
 	BackboneHeight = 14
 	MotifHeight    = 18
@@ -25,7 +25,7 @@ const (
 	Padding        = 15
 	AxisPadding    = 10
 	AxisHeight     = 15
-	GraphicHeight  = LollipopRadius + LollipopHeight + DomainHeight + AxisPadding + AxisHeight + Padding*2
+	GraphicHeight  = DomainHeight + Padding*2
 	//GraphicWidth   = 740
 )
 
@@ -90,39 +90,70 @@ func BlendColorStrings(a, b string) string {
 }
 
 func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicResponse) {
-	ht := GraphicHeight
-	if len(changelist) == 0 {
-		ht -= LollipopHeight
-	}
-	if *hideAxis {
-		ht -= AxisPadding + AxisHeight
-	}
-	fmt.Fprintf(w, svgHeader, GraphicWidth, GraphicHeight)
-
 	aaLen, _ := g.Length.Int64()
 	scale := float64(GraphicWidth-Padding*2) / float64(aaLen)
+	popSpace := int(float64(LollipopRadius+2) / scale)
+	aaSpace := int(20 / scale)
+	startY := Padding
+
+	pops := TickSlice{}
+	ht := GraphicHeight
+	if len(changelist) > 0 {
+		// parse changelist and check if lollipops need staggered
+		for i, chg := range changelist {
+			cpos := stripChangePos.FindStringSubmatch(chg)
+			spos := 0
+			fmt.Sscanf(cpos[1], "%d", &spos)
+			pops = append(pops, Tick{spos, -i})
+		}
+		sort.Sort(pops)
+		maxStaggered := LollipopRadius + LollipopHeight
+		for pi, pop := range pops {
+			h := LollipopRadius + LollipopHeight
+			for pj := pi + 1; pj < len(pops); pj++ {
+				if pops[pj].Pos-pop.Pos > popSpace {
+					break
+				}
+				h += LollipopRadius * 3
+			}
+			if h > maxStaggered {
+				maxStaggered = h
+			}
+		}
+		ht += maxStaggered
+		startY += maxStaggered - (LollipopRadius + LollipopHeight)
+	}
+	if !*hideAxis {
+		ht += AxisPadding + AxisHeight
+	}
 
 	ticks := []Tick{
 		Tick{0, 0},           // start isn't very important (0 is implied)
 		Tick{int(aaLen), 99}, // always draw the length in the axis
 	}
 
-	startY := Padding
-	if len(changelist) > 0 {
-		poptop := Padding + LollipopRadius
+	fmt.Fprintf(w, svgHeader, GraphicWidth, ht)
+
+	if len(pops) > 0 {
+		poptop := startY + LollipopRadius
 		popbot := poptop + LollipopHeight
 		startY = popbot - (DomainHeight-BackboneHeight)/2
 
 		// draw lollipops
-		for _, chg := range changelist {
-			cpos := stripChangePos.FindStringSubmatch(chg)
-			spos := 0.0
-			fmt.Sscanf(cpos[1], "%f", &spos)
-			ticks = append(ticks, Tick{int(spos), 10})
-			spos = Padding + (spos * scale)
+		for pi, pop := range pops {
+			ticks = append(ticks, Tick{pop.Pos, 10})
+			spos := Padding + (float64(pop.Pos) * scale)
 
-			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%d" y2="%d" stroke="#BABDB6" stroke-width="3"/>`, spos, spos, poptop, popbot)
-			fmt.Fprintf(w, `<a xlink:title="%s"><circle cx="%f" cy="%d" r="%d" fill="#FF5555" /></a>`, chg, spos, poptop, LollipopRadius)
+			mytop := poptop
+			for pj := pi + 1; pj < len(pops); pj++ {
+				if pops[pj].Pos-pop.Pos > popSpace {
+					break
+				}
+				mytop -= LollipopRadius * 3
+			}
+			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%d" y2="%d" stroke="#BABDB6" stroke-width="2"/>`, spos, spos, mytop, popbot)
+			fmt.Fprintf(w, `<a xlink:title="%s"><circle cx="%f" cy="%d" r="%d" fill="#FF5555" /></a>`,
+				changelist[-pop.Pri], spos, mytop, LollipopRadius)
 		}
 	}
 
@@ -224,7 +255,6 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 		fmt.Fprintf(w, `<line x1="%d" x2="%d" y1="%d" y2="%d" stroke="#AAAAAA" />`, Padding, GraphicWidth-Padding, startY, startY)
 		fmt.Fprintf(w, `<line x1="%d" x2="%d" y1="%d" y2="%d" stroke="#AAAAAA" />`, Padding, Padding, startY, startY+(AxisHeight/3))
 
-		aaSpace := int(20 / scale)
 		ts := TickSlice(ticks)
 		sort.Sort(ts)
 		lastDrawn := 0
