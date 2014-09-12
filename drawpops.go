@@ -22,15 +22,16 @@ const (
 const svgHeader = `<?xml version='1.0'?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="%d" height="%d">
 <defs>
-    <filter id="ds" x="0" y="0">
-      <feOffset in="SourceAlpha" dx="2" dy="2" />
-      <feComponentTransfer>
-	    <feFuncA type="linear" slope="0.2"/>
-	  </feComponentTransfer>
-      <feGaussianBlur result="blurOut" stdDeviation="1" />
-      <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
-    </filter>
-  </defs>
+  <filter id="ds" x="0" y="0">
+    <feOffset in="SourceAlpha" dx="2" dy="2" />
+    <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+    <feGaussianBlur result="blurOut" stdDeviation="1" />
+    <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+  </filter>
+  <pattern id="hatch" patternUnits="userSpaceOnUse" width="4" height="4">
+    <path d="M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2" stroke="#000000" opacity="0.3" />
+  </pattern>
+</defs>
 <style>text{font-size:12px;font-family:sans-serif;fill:#ffffff;}</style>
 `
 const svgFooter = `</svg>`
@@ -87,8 +88,14 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 		swidth = (swidth * scale) - sstart
 
 		fmt.Fprintf(w, `<a xlink:title="%s">`, r.Type)
-		fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%d" width="%f" height="%d" filter="url(#ds)"/>`, BlendColorStrings(r.Color, "#FFFFFF"),
-			Padding+sstart, startY+(DomainHeight-MotifHeight)/2, swidth, MotifHeight)
+		if r.Type == "disorder" {
+			// draw disordered regions with a understated diagonal hatch pattern
+			fmt.Fprintf(w, `<rect fill="url(#hatch)" x="%f" y="%d" width="%f" height="%d"/>`,
+				Padding+sstart, startY+(DomainHeight-BackboneHeight)/2, swidth, BackboneHeight)
+		} else {
+			fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%d" width="%f" height="%d" filter="url(#ds)"/>`, BlendColorStrings(r.Color, "#FFFFFF"),
+				Padding+sstart, startY+(DomainHeight-MotifHeight)/2, swidth, MotifHeight)
+		}
 		fmt.Fprintln(w, `</a>`)
 	}
 
