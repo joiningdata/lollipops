@@ -12,7 +12,7 @@ are provided, it will also annotate them to the diagram using the
 Example
 -------
 
-    ./lollipops -w 600 -o tp53.svg TP53 R248Q R273C R249S
+    ./lollipops TP53 R248Q R273C R249S
 
 Results in the following SVG image:
 
@@ -21,7 +21,7 @@ Results in the following SVG image:
 Usage
 -----
 
-Usage: ``lollipops [options] -o out.svg GENE_SYMBOL [PROTEIN CHANGES ...]``
+Usage: ``lollipops [options] GENE_SYMBOL [PROTEIN CHANGES ...]``
 
 Where ``GENE_SYMBOL`` is the official HGNC symbol and ``PROTEIN CHANGES``
 is a list of amino acid changes of the format "(amino-code)(position)..."
@@ -29,10 +29,11 @@ Amino-code can be either the 1- or 3-character code for the amino acid.
 Only the first position in each change is used for plotting even if the
 change contains a range. All characters after the position are ignored.
 
+    -o=out.svg         SVG output filename (default GENE_SYMBOL.svg)
     -hide-axis         do not draw the aa position axis
     -hide-disordered   do not draw disordered regions
     -hide-motifs       do not draw motifs
-    -w=740             SVG output width
+    -w=700             SVG output width
 
 Installation
 ------------

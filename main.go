@@ -7,20 +7,23 @@ import (
 )
 
 var (
-	output = flag.String("o", "", "output SVG file")
-	width  = flag.Int("w", 740, "SVG output width")
+	output = flag.String("o", "", "output SVG file (default GENE_SYMBOL.svg)")
+	width  = flag.Int("w", 700, "SVG output width")
 )
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [options] -o out.svg GENE_SYMBOL [PROTEIN CHANGES ...]\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] GENE_SYMBOL [PROTEIN CHANGES ...]\n\n", os.Args[0])
 		fmt.Fprintln(os.Stderr, "Where options are:")
 		flag.PrintDefaults()
 	}
 	flag.Parse()
-	if *output == "" || flag.NArg() == 0 {
+	if flag.NArg() == 0 {
 		flag.Usage()
 		os.Exit(1)
+	}
+	if *output == "" {
+		*output = flag.Arg(0) + ".svg"
 	}
 
 	f, err := os.OpenFile(*output, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)

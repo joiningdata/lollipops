@@ -206,7 +206,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 
 		fmt.Fprintf(w, `<g transform="translate(%f,%d)"><a xlink:href="%s" xlink:title="%s">`, Padding+sstart, startY, "http://pfam.xfam.org"+r.Link, r.Metadata.Description)
 		fmt.Fprintf(w, `<rect fill="%s" x="0" y="0" width="%f" height="%d" filter="url(#ds)"/>`, r.Color, swidth, DomainHeight)
-		if swidth > 40 {
+		if swidth > 10 {
 			if len(r.Metadata.Description) > 1 && float64(MeasureFont(r.Metadata.Description, 12)) < (swidth-TextPadding) {
 				// we can fit the full description! nice!
 				fmt.Fprintf(w, `<text text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, r.Metadata.Description)
@@ -240,7 +240,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 					}
 				}
 
-				if !didOutput {
+				if !didOutput && swidth > 40 {
 					sub := r.Text
 					for mx := len(r.Text) - 2; mx > 0; mx-- {
 						sub = strings.TrimFunc(r.Text[:mx], unicode.IsPunct) + ".."
