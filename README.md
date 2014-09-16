@@ -12,7 +12,7 @@ are provided, it will also annotate them to the diagram using the
 Example
 -------
 
-    ./lollipops TP53 R248Q R273C R249S
+    ./lollipops -w=700 TP53 R248Q R273C R249S
 
 Results in the following SVG image:
 
@@ -33,7 +33,7 @@ change contains a range. All characters after the position are ignored.
     -hide-axis         do not draw the aa position axis
     -hide-disordered   do not draw disordered regions
     -hide-motifs       do not draw motifs
-    -w=700             SVG output width
+    -w=700             SVG output width (default=automatic)
 
 Installation
 ------------

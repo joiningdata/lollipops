@@ -90,7 +90,34 @@ func BlendColorStrings(a, b string) string {
 	return fmt.Sprintf("#%02X%02X%02X", (r1+r2)/2, (g1+g2)/2, (b1+b2)/2)
 }
 
+// AutoWidth automatically determines the best width to use to fit all
+// available domain names into the plot.
+func AutoWidth(g *PfamGraphicResponse) int {
+	aaLen, _ := g.Length.Float64()
+	w := 400.0
+
+	for _, r := range g.Regions {
+		sstart, _ := r.Start.Float64()
+		send, _ := r.End.Float64()
+
+		aaPart := (send - sstart) / aaLen
+		minTextWidth := MeasureFont(r.Text, 12) + (TextPadding * 2) + 1
+
+		ww := (float64(minTextWidth) / aaPart)
+		if ww > w {
+			w = ww
+		}
+	}
+	return int(w + (Padding * 2))
+}
+
+// DrawSVG writes the SVG XML document to w, with the provided changes in changelist
+// and Pfam domain/region information in g. If GraphicWidth=0, the AutoWidth is called
+// to determine the best diagram width to fit all labels.
 func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicResponse) {
+	if GraphicWidth == 0 {
+		GraphicWidth = AutoWidth(g)
+	}
 	aaLen, _ := g.Length.Int64()
 	scale := float64(GraphicWidth-Padding*2) / float64(aaLen)
 	popSpace := int(float64(LollipopRadius+2) / scale)

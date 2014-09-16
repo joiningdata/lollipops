@@ -8,7 +8,7 @@ import (
 
 var (
 	output = flag.String("o", "", "output SVG file (default GENE_SYMBOL.svg)")
-	width  = flag.Int("w", 700, "SVG output width")
+	width  = flag.Int("w", 0, "SVG output width (default automatic fit labels)")
 )
 
 func main() {
