@@ -25,6 +25,7 @@ const (
 	Padding        = 15
 	AxisPadding    = 10
 	AxisHeight     = 15
+	TextPadding    = 5
 	GraphicHeight  = DomainHeight + Padding*2
 	//GraphicWidth   = 740
 )
@@ -206,10 +207,10 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 		fmt.Fprintf(w, `<g transform="translate(%f,%d)"><a xlink:href="%s" xlink:title="%s">`, Padding+sstart, startY, "http://pfam.xfam.org"+r.Link, r.Metadata.Description)
 		fmt.Fprintf(w, `<rect fill="%s" x="0" y="0" width="%f" height="%d" filter="url(#ds)"/>`, r.Color, swidth, DomainHeight)
 		if swidth > 40 {
-			if len(r.Metadata.Description) > 1 && float64(len(r.Metadata.Description))*10 < swidth {
+			if len(r.Metadata.Description) > 1 && float64(MeasureFont(r.Metadata.Description, 12)) < (swidth-TextPadding) {
 				// we can fit the full description! nice!
 				fmt.Fprintf(w, `<text text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, r.Metadata.Description)
-			} else if float64(len(r.Text))*10 < swidth {
+			} else if float64(MeasureFont(r.Text, 12)) < (swidth - TextPadding) {
 				fmt.Fprintf(w, `<text text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, r.Text)
 			} else {
 				didOutput := false
@@ -230,7 +231,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 						if i == 0 {
 							pre = ""
 						}
-						if float64(len(pre+parts[i]+post))*10 < swidth {
+						if float64(MeasureFont(pre+parts[i]+post, 12)) < (swidth - TextPadding) {
 							fmt.Fprintf(w, `<text text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, pre+parts[i]+post)
 							didOutput = true
 							break
@@ -240,8 +241,14 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 				}
 
 				if !didOutput {
-					mx := int(swidth / 10)
-					sub := strings.TrimFunc(r.Text[:mx], unicode.IsPunct) + ".."
+					sub := r.Text
+					for mx := len(r.Text) - 2; mx > 0; mx-- {
+						sub = strings.TrimFunc(r.Text[:mx], unicode.IsPunct) + ".."
+						if float64(MeasureFont(sub, 12)) < (swidth - TextPadding) {
+							break
+						}
+					}
+
 					fmt.Fprintf(w, `<text text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, sub)
 				}
 			}
