@@ -193,6 +193,9 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 	if !*hideMotifs {
 		// draw transmembrane, signal peptide, coiled-coil, etc motifs
 		for _, r := range g.Motifs {
+			if r.Type == "pfamb" {
+				continue
+			}
 			if r.Type == "disorder" && *hideDisordered {
 				continue
 			}
