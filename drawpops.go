@@ -14,6 +14,7 @@ var (
 	hideDisordered = flag.Bool("hide-disordered", false, "do not draw disordered regions")
 	hideMotifs     = flag.Bool("hide-motifs", false, "do not draw motifs")
 	hideAxis       = flag.Bool("hide-axis", false, "do not draw the aa position axis")
+	forPDF         = flag.Bool("for-pdf", false, "use solid fill instead of patterns for PDF output")
 )
 
 const (
@@ -39,7 +40,7 @@ const svgHeader = `<?xml version='1.0'?>
     <feGaussianBlur result="blurOut" stdDeviation="1" />
     <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
   </filter>
-  <pattern id="hatch" patternUnits="userSpaceOnUse" width="4" height="4">
+  <pattern id="disordered-hatch" patternUnits="userSpaceOnUse" width="4" height="4">
     <path d="M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2" stroke="#000000" opacity="0.3" />
   </pattern>
 </defs>
@@ -186,6 +187,10 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 		g.Metadata.Identifier, g.Metadata.Description, aaLen,
 		Padding, startY+(DomainHeight-BackboneHeight)/2, GraphicWidth-(Padding*2), BackboneHeight)
 
+	disFill := "url(#disordered-hatch)"
+	if *forPDF {
+		disFill = `#000;" opacity="0.15`
+	}
 	if !*hideMotifs {
 		// draw transmembrane, signal peptide, coiled-coil, etc motifs
 		for _, r := range g.Motifs {
@@ -204,7 +209,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 			fmt.Fprintf(w, `<a xlink:title="%s">`, r.Type)
 			if r.Type == "disorder" {
 				// draw disordered regions with a understated diagonal hatch pattern
-				fmt.Fprintf(w, `<rect fill="url(#hatch)" x="%f" y="%d" width="%f" height="%d"/>`,
+				fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%d" width="%f" height="%d"/>`, disFill,
 					Padding+sstart, startY+(DomainHeight-BackboneHeight)/2, swidth, BackboneHeight)
 			} else {
 				fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%d" width="%f" height="%d" filter="url(#ds)"/>`, BlendColorStrings(r.Color, "#FFFFFF"),
