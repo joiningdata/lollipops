@@ -43,10 +43,6 @@ const svgHeader = `<?xml version='1.0'?>
     <path d="M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2" stroke="#000000" opacity="0.3" />
   </pattern>
 </defs>
-<style>
-text{font-size:12px;font-family:sans-serif;fill:#ffffff;}
-.axis text{font-size:10px;font-family:sans-serif;fill:#000000;}
-</style>
 `
 const svgFooter = `</svg>`
 
@@ -239,9 +235,9 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 		if swidth > 10 {
 			if len(r.Metadata.Description) > 1 && float64(MeasureFont(r.Metadata.Description, 12)) < (swidth-TextPadding) {
 				// we can fit the full description! nice!
-				fmt.Fprintf(w, `<text text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, r.Metadata.Description)
+				fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, r.Metadata.Description)
 			} else if float64(MeasureFont(r.Text, 12)) < (swidth - TextPadding) {
-				fmt.Fprintf(w, `<text text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, r.Text)
+				fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, r.Text)
 			} else {
 				didOutput := false
 				if strings.IndexFunc(r.Text, unicode.IsPunct) != -1 {
@@ -262,7 +258,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 							pre = ""
 						}
 						if float64(MeasureFont(pre+parts[i]+post, 12)) < (swidth - TextPadding) {
-							fmt.Fprintf(w, `<text text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, pre+parts[i]+post)
+							fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, pre+parts[i]+post)
 							didOutput = true
 							break
 						}
@@ -279,7 +275,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 						}
 					}
 
-					fmt.Fprintf(w, `<text text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, sub)
+					fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, sub)
 				}
 			}
 		}
@@ -306,7 +302,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 			lastDrawn = t.Pos
 			x := Padding + (float64(t.Pos) * scale)
 			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%d" y2="%d" stroke="#AAAAAA" />`, x, x, startY, startY+(AxisHeight/3))
-			fmt.Fprintf(w, `<text text-anchor="middle" x="%f" y="%d">%d</text>`, x, startY+AxisHeight, t.Pos)
+			fmt.Fprintf(w, `<text style="font-size:10px;font-family:sans-serif;fill:#000000;" text-anchor="middle" x="%f" y="%d">%d</text>`, x, startY+AxisHeight, t.Pos)
 		}
 
 		fmt.Fprintln(w, "</g>")
