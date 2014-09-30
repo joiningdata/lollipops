@@ -35,6 +35,12 @@ change contains a range. All characters after the position are ignored.
     -hide-motifs       do not draw motifs
     -w=700             SVG output width (default=automatic)
 
+If you are working with non-human data, or know the Uniprot Accession
+already, You can specify it with `-U UNIPROTID` instead of GENE_SYMBOL,
+for example the following mouse query works for gene `Mobp`:
+
+    ./lollipops -U Q9D2P8
+
 Installation
 ------------
 
