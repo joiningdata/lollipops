@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	showLabels     = flag.Bool("labels", false, "draw mutation labels above lollipops")
 	hideDisordered = flag.Bool("hide-disordered", false, "do not draw disordered regions")
 	hideMotifs     = flag.Bool("hide-motifs", false, "do not draw motifs")
 	hideAxis       = flag.Bool("hide-axis", false, "do not draw the aa position axis")
@@ -77,7 +78,7 @@ func (t TickSlice) Less(i, j int) bool {
 	return t[i].Pos < t[j].Pos
 }
 
-var stripChangePos = regexp.MustCompile("[A-Z][a-z]*([0-9]+)")
+var stripChangePos = regexp.MustCompile("(^|[A-Z][a-z]*)([0-9]+)")
 
 // BlendColorStrings blends two CSS #RRGGBB colors together with a straight average.
 func BlendColorStrings(a, b string) string {
@@ -120,6 +121,9 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 	popSpace := int(float64(LollipopRadius+2) / scale)
 	aaSpace := int(20 / scale)
 	startY := Padding
+	if *showLabels {
+		startY += Padding // add some room for labels
+	}
 
 	pops := TickSlice{}
 	ht := GraphicHeight
@@ -128,7 +132,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 		for i, chg := range changelist {
 			cpos := stripChangePos.FindStringSubmatch(chg)
 			spos := 0
-			fmt.Sscanf(cpos[1], "%d", &spos)
+			fmt.Sscanf(cpos[2], "%d", &spos)
 			pops = append(pops, Tick{spos, -i})
 		}
 		sort.Sort(pops)
@@ -179,6 +183,13 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%d" y2="%d" stroke="#BABDB6" stroke-width="2"/>`, spos, spos, mytop, popbot)
 			fmt.Fprintf(w, `<a xlink:title="%s"><circle cx="%f" cy="%d" r="%d" fill="#FF5555" /></a>`,
 				changelist[-pop.Pri], spos, mytop, LollipopRadius)
+
+			if *showLabels {
+				fmt.Fprintf(w, `<g transform="translate(%f,%d) rotate(-30)">`,
+					spos, mytop)
+				fmt.Fprintf(w, `<text style="font-size:10px;font-family:sans-serif;fill:#555;" text-anchor="middle" x="0" y="%f">%s</text></g>`,
+					(LollipopRadius * -1.5), changelist[-pop.Pri])
+			}
 		}
 	}
 
