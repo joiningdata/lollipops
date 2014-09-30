@@ -21,10 +21,12 @@ func main() {
 	flag.Parse()
 
 	var err error
+	varStart := 0
 	acc := ""
 	geneSymbol := ""
 	if *uniprot == "" && flag.NArg() > 0 {
 		geneSymbol = flag.Arg(0)
+		varStart = 1
 
 		fmt.Fprintln(os.Stderr, "HGNC Symbol: ", flag.Arg(0))
 
@@ -41,13 +43,9 @@ func main() {
 		acc = *uniprot
 	}
 
-	varStart := 1
-	if flag.NArg() == 0 {
-		varStart = 0
-		if *uniprot == "" {
-			flag.Usage()
-			os.Exit(1)
-		}
+	if flag.NArg() == 0 && *uniprot == "" {
+		flag.Usage()
+		os.Exit(1)
 	}
 
 	data, err := GetPfamGraphicData(acc)
