@@ -30,6 +30,7 @@ Only the first position in each change is used for plotting even if the
 change contains a range. All characters after the position are ignored.
 
     -o=out.svg         SVG output filename (default GENE_SYMBOL.svg)
+    -labels            draw labels for each mutation
     -hide-axis         do not draw the aa position axis
     -hide-disordered   do not draw disordered regions
     -hide-motifs       do not draw motifs
