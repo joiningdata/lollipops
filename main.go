@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	output = flag.String("o", "", "output SVG file (default GENE_SYMBOL.svg)")
-	width  = flag.Int("w", 0, "SVG output width (default automatic fit labels)")
+	uniprot = flag.String("U", "", "Uniprot accession instead of GENE_SYMBOL")
+	output  = flag.String("o", "", "output SVG file (default GENE_SYMBOL.svg)")
+	width   = flag.Int("w", 0, "SVG output width (default automatic fit labels)")
 )
 
 func main() {
@@ -18,12 +19,49 @@ func main() {
 		flag.PrintDefaults()
 	}
 	flag.Parse()
+
+	var err error
+	acc := ""
+	geneSymbol := ""
+	if *uniprot == "" && flag.NArg() > 0 {
+		geneSymbol = flag.Arg(0)
+
+		fmt.Fprintln(os.Stderr, "HGNC Symbol: ", flag.Arg(0))
+
+		acc, err = GetProtID(flag.Arg(0))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+
+		fmt.Fprintln(os.Stderr, "Uniprot/SwissProt Accession: ", acc)
+	}
+
+	if *uniprot != "" {
+		acc = *uniprot
+	}
+
+	varStart := 1
 	if flag.NArg() == 0 {
-		flag.Usage()
+		varStart = 0
+		if *uniprot == "" {
+			flag.Usage()
+			os.Exit(1)
+		}
+	}
+
+	data, err := GetPfamGraphicData(acc)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	if geneSymbol == "" {
+		geneSymbol = data.Metadata.Identifier
+		fmt.Fprintln(os.Stderr, "Pfam Symbol: ", geneSymbol)
+	}
+
 	if *output == "" {
-		*output = flag.Arg(0) + ".svg"
+		*output = geneSymbol + ".svg"
 	}
 
 	f, err := os.OpenFile(*output, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
@@ -33,21 +71,6 @@ func main() {
 	}
 	defer f.Close()
 
-	fmt.Fprintln(os.Stderr, "HGNC Symbol: ", flag.Arg(0))
-
-	acc, err := GetProtID(flag.Arg(0))
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-	fmt.Fprintln(os.Stderr, "Uniprot/SwissProt Accession: ", acc)
-
-	data, err := GetPfamGraphicData(acc)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-
 	fmt.Fprintln(os.Stderr, "Drawing diagram to", *output)
-	DrawSVG(f, *width, flag.Args()[1:], data)
+	DrawSVG(f, *width, flag.Args()[varStart:], data)
 }
