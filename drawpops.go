@@ -51,6 +51,7 @@ const svgFooter = `</svg>`
 type Tick struct {
 	Pos int
 	Pri int
+	Col string //added new color field - Jim H.
 }
 
 type TickSlice []Tick
@@ -78,7 +79,7 @@ func (t TickSlice) Less(i, j int) bool {
 	return t[i].Pos < t[j].Pos
 }
 
-var stripChangePos = regexp.MustCompile("(^|[A-Z][a-z]*)([0-9]+)")
+var stripChangePos = regexp.MustCompile("(^|[A-Za-z]*)([0-9]+)([A-Za-z]*)") //fixed regex to capture three character and one-character codes and differentiate b/w non-syn and syn variants - Jim H.
 
 // BlendColorStrings blends two CSS #RRGGBB colors together with a straight average.
 func BlendColorStrings(a, b string) string {
@@ -126,14 +127,20 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 	}
 
 	pops := TickSlice{}
+	col := "blue" //by default, synonymous - Jim H.
 	ht := GraphicHeight
 	if len(changelist) > 0 {
 		// parse changelist and check if lollipops need staggered
 		for i, chg := range changelist {
 			cpos := stripChangePos.FindStringSubmatch(chg)
 			spos := 0
+			if cpos[3]!="" { // if non-synonymous, it will have an amino acid change - Jim H.
+                col="red"
+        	} else if cpos[3]=="" { // if synonymous, it will have no amino acid change - Jim H.
+        		col="blue"
+        	}
 			fmt.Sscanf(cpos[2], "%d", &spos)
-			pops = append(pops, Tick{spos, -i})
+			pops = append(pops, Tick{spos, -i,col})  //added new field - Jim H.
 		}
 		sort.Sort(pops)
 		maxStaggered := LollipopRadius + LollipopHeight
@@ -157,8 +164,8 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 	}
 
 	ticks := []Tick{
-		Tick{0, 0},           // start isn't very important (0 is implied)
-		Tick{int(aaLen), 99}, // always draw the length in the axis
+		Tick{0, 0,col},           // start isn't very important (0 is implied) // wrote in new field - Jim H.
+		Tick{int(aaLen), 99,col}, // always draw the length in the axis // wrote in new field - Jim H.
 	}
 
 	fmt.Fprintf(w, svgHeader, GraphicWidth, ht)
@@ -170,7 +177,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 
 		// draw lollipops
 		for pi, pop := range pops {
-			ticks = append(ticks, Tick{pop.Pos, 10})
+			ticks = append(ticks, Tick{pop.Pos, 10, col}) // wrote in new field - Jim H.
 			spos := Padding + (float64(pop.Pos) * scale)
 
 			mytop := poptop
@@ -181,8 +188,15 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 				mytop -= LollipopRadius * 3
 			}
 			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%d" y2="%d" stroke="#BABDB6" stroke-width="2"/>`, spos, spos, mytop, popbot)
-			fmt.Fprintf(w, `<a xlink:title="%s"><circle cx="%f" cy="%d" r="%d" fill="#FF5555" /></a>`,
-				changelist[-pop.Pri], spos, mytop, LollipopRadius)
+			if pop.Col == "red" {  // if non-synonymous - Jim H.
+				fmt.Fprintf(w, `<a xlink:title="%s"><circle cx="%f" cy="%d" r="%d" fill="#FF5555" /></a>`, //colorrrrrr - Jim H.
+					changelist[-pop.Pri], spos, mytop, LollipopRadius)
+			}
+			if pop.Col == "blue" { // if synonymous - Jim H.
+				fmt.Fprintf(w, `<a xlink:title="%s"><circle cx="%f" cy="%d" r="%d" fill="#0000ff" /></a>`, //colorrrrrr - Jim H.
+					changelist[-pop.Pri], spos, mytop, LollipopRadius)
+			}
+
 
 			if *showLabels {
 				fmt.Fprintf(w, `<g transform="translate(%f,%d) rotate(-30)">`,
@@ -228,8 +242,8 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 
 				tstart, _ := r.Start.Int64()
 				tend, _ := r.End.Int64()
-				ticks = append(ticks, Tick{int(tstart), 1})
-				ticks = append(ticks, Tick{int(tend), 1})
+				ticks = append(ticks, Tick{int(tstart), 1, col})  // new field - Jim H.
+				ticks = append(ticks, Tick{int(tend), 1, col})  // new field - Jim H.
 			}
 			fmt.Fprintln(w, `</a>`)
 		}
@@ -240,8 +254,8 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 		sstart, _ := r.Start.Float64()
 		swidth, _ := r.End.Float64()
 
-		ticks = append(ticks, Tick{int(sstart), 5})
-		ticks = append(ticks, Tick{int(swidth), 5})
+		ticks = append(ticks, Tick{int(sstart), 5, col}) // new field - Jim H.
+		ticks = append(ticks, Tick{int(swidth), 5, col}) // new field - Jim H.
 
 		sstart *= scale
 		swidth = (swidth * scale) - sstart
