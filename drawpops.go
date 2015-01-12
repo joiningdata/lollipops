@@ -139,6 +139,9 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 			} else if cpos[3] == "" {
 				col = "#0000ff"
 			}
+			if strings.Contains(chg, "#") {
+				col = "#" + strings.SplitN(chg, "#", 2)[1]
+			}
 			fmt.Sscanf(cpos[2], "%d", &spos)
 			pops = append(pops, Tick{spos, -i, col})
 		}
