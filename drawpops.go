@@ -199,8 +199,12 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 			if *showLabels {
 				fmt.Fprintf(w, `<g transform="translate(%f,%d) rotate(-30)">`,
 					spos, mytop)
+				chg := changelist[-pop.Pri]
+				if strings.Contains(chg, "#") {
+					chg = strings.SplitN(chg, "#", 2)[0]
+				}
 				fmt.Fprintf(w, `<text style="font-size:10px;font-family:sans-serif;fill:#555;" text-anchor="middle" x="0" y="%f">%s</text></g>`,
-					(LollipopRadius * -1.5), changelist[-pop.Pri])
+					(LollipopRadius * -1.5), chg)
 			}
 		}
 	}
