@@ -12,7 +12,7 @@ are provided, it will also annotate them to the diagram using the
 Example
 -------
 
-    ./lollipops -w=700 TP53 R248Q R273C R249S
+    ./lollipops -w=700 TP53 R273C R175H T125 R248Q#7f3333
 
 Results in the following SVG image:
 
@@ -28,6 +28,8 @@ is a list of amino acid changes of the format "(amino-code)(position)..."
 Amino-code can be either the 1- or 3-character code for the amino acid.
 Only the first position in each change is used for plotting even if the
 change contains a range. All characters after the position are ignored.
+Protein changes may also be appended with a hex color code (seen in
+example above) to alter the lollipop color for each specific mutation.
 
     -o=out.svg         SVG output filename (default GENE_SYMBOL.svg)
     -labels            draw labels for each mutation
@@ -35,6 +37,8 @@ change contains a range. All characters after the position are ignored.
     -hide-disordered   do not draw disordered regions
     -hide-motifs       do not draw motifs
     -w=700             SVG output width (default=automatic)
+    -mut-color=#ff0000 color to use for non-synonymous lollipops
+    -syn-color=#0000ff color to use for synonymous lollipops
 
 If you are working with non-human data, or know the Uniprot Accession
 already, You can specify it with `-U UNIPROTID` instead of GENE_SYMBOL,
