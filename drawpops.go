@@ -16,6 +16,9 @@ var (
 	hideMotifs     = flag.Bool("hide-motifs", false, "do not draw motifs")
 	hideAxis       = flag.Bool("hide-axis", false, "do not draw the aa position axis")
 	forPDF         = flag.Bool("for-pdf", false, "use solid fill instead of patterns for PDF output")
+
+	synColor = flag.String("syn-color", "#0000ff", "color to use for synonymous lollipops")
+	mutColor = flag.String("mut-color", "#ff0000", "color to use for non-synonymous lollipops")
 )
 
 const (
@@ -127,17 +130,16 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 	}
 
 	pops := TickSlice{}
-	col := "#0000ff"
+	col := *synColor
 	ht := GraphicHeight
 	if len(changelist) > 0 {
 		// parse changelist and check if lollipops need staggered
 		for i, chg := range changelist {
 			cpos := stripChangePos.FindStringSubmatch(chg)
 			spos := 0
-			if cpos[3] != "" {
-				col = "FF5555"
-			} else if cpos[3] == "" {
-				col = "#0000ff"
+			col = *synColor
+			if cpos[3] != "" && cpos[3] != "=" && cpos[3] != cpos[1] {
+				col = *mutColor
 			}
 			if strings.Contains(chg, "#") {
 				col = "#" + strings.SplitN(chg, "#", 2)[1]
@@ -167,8 +169,8 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 	}
 
 	ticks := []Tick{
-		Tick{0, 0, col},           // start isn't very important (0 is implied) // wrote in new field - Jim H.
-		Tick{int(aaLen), 99, col}, // always draw the length in the axis // wrote in new field - Jim H.
+		Tick{0, 0, ""},           // start isn't very important (0 is implied) // wrote in new field - Jim H.
+		Tick{int(aaLen), 99, ""}, // always draw the length in the axis // wrote in new field - Jim H.
 	}
 
 	fmt.Fprintf(w, svgHeader, GraphicWidth, ht)
@@ -180,7 +182,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 
 		// draw lollipops
 		for pi, pop := range pops {
-			ticks = append(ticks, Tick{pop.Pos, 10, col})
+			ticks = append(ticks, Tick{pop.Pos, 10, ""})
 			spos := Padding + (float64(pop.Pos) * scale)
 
 			mytop := poptop
@@ -238,8 +240,8 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 
 				tstart, _ := r.Start.Int64()
 				tend, _ := r.End.Int64()
-				ticks = append(ticks, Tick{int(tstart), 1, col})
-				ticks = append(ticks, Tick{int(tend), 1, col})
+				ticks = append(ticks, Tick{int(tstart), 1, ""})
+				ticks = append(ticks, Tick{int(tend), 1, ""})
 			}
 			fmt.Fprintln(w, `</a>`)
 		}
@@ -250,8 +252,8 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 		sstart, _ := r.Start.Float64()
 		swidth, _ := r.End.Float64()
 
-		ticks = append(ticks, Tick{int(sstart), 5, col})
-		ticks = append(ticks, Tick{int(swidth), 5, col})
+		ticks = append(ticks, Tick{int(sstart), 5, ""})
+		ticks = append(ticks, Tick{int(swidth), 5, ""})
 
 		sstart *= scale
 		swidth = (swidth * scale) - sstart
