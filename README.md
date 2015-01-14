@@ -12,11 +12,20 @@ are provided, it will also annotate them to the diagram using the
 Example
 -------
 
-    ./lollipops -w=700 TP53 R273C R175H T125 R248Q#7f3333
+Basic usage is just the gene symbol (ex: ``TP53``) and a list of
+mutations (ex: ``R273C R175H T125 R248Q``)
 
-Results in the following SVG image:
+    ./lollipops TP53 R273C R175H T125 R248Q
 
-![TP53 Lollipop diagram with 3 marked mutations](tp53.png?raw=true)
+![TP53 Lollipop diagram with 4 marked mutations](tp53.png?raw=true)
+
+More advanced usage allows for per-mutation color (e.x. sample type) and
+size specification (i.e. denoting number of samples), along with text
+labels and more:
+
+		./lollipops -labels TP53 R248Q#7f3333@131 R273C R175H T125@5
+
+![TP53 Lollipop diagram with 5 customized mutations](tp53_more.png?raw=true)
 
 Usage
 -----
