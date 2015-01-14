@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"regexp"
 	"sort"
 	"strings"
@@ -54,6 +55,7 @@ const svgFooter = `</svg>`
 type Tick struct {
 	Pos int
 	Pri int
+	Cnt int
 	Col string
 }
 
@@ -113,6 +115,13 @@ func AutoWidth(g *PfamGraphicResponse) int {
 	return int(w + (Padding * 2))
 }
 
+func (t *Tick) Radius() float64 {
+	if t.Cnt <= 1 {
+		return LollipopRadius
+	}
+	return math.Sqrt(math.Log(float64(2+t.Cnt)) * LollipopRadius * LollipopRadius)
+}
+
 // DrawSVG writes the SVG XML document to w, with the provided changes in changelist
 // and Pfam domain/region information in g. If GraphicWidth=0, the AutoWidth is called
 // to determine the best diagram width to fit all labels.
@@ -133,13 +142,20 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 	col := *synColor
 	ht := GraphicHeight
 	if len(changelist) > 0 {
+		popMatch := make(map[string]int)
 		// parse changelist and check if lollipops need staggered
 		for i, chg := range changelist {
+			cnt := 1
 			cpos := stripChangePos.FindStringSubmatch(chg)
 			spos := 0
 			col = *synColor
 			if cpos[3] != "" && cpos[3] != "=" && cpos[3] != cpos[1] {
 				col = *mutColor
+			}
+			if strings.Contains(chg, "@") {
+				parts := strings.SplitN(chg, "@", 2)
+				fmt.Sscanf(parts[1], "%d", &cnt)
+				chg = parts[0]
 			}
 			if strings.Contains(chg, "#") {
 				parts := strings.SplitN(chg, "#", 2)
@@ -148,7 +164,12 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 			}
 			changelist[i] = chg
 			fmt.Sscanf(cpos[2], "%d", &spos)
-			pops = append(pops, Tick{spos, -i, col})
+			if idx, f := popMatch[chg]; f {
+				pops[idx].Cnt += cnt
+			} else {
+				popMatch[chg] = len(pops)
+				pops = append(pops, Tick{spos, -i, cnt, col})
+			}
 		}
 		sort.Sort(pops)
 		maxStaggered := LollipopRadius + LollipopHeight
@@ -158,7 +179,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 				if pops[pj].Pos-pop.Pos > popSpace {
 					break
 				}
-				h += LollipopRadius * 3
+				h += int(0.5 + (pop.Radius() * 3.0))
 			}
 			if h > maxStaggered {
 				maxStaggered = h
@@ -193,18 +214,21 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 				if pops[pj].Pos-pop.Pos > popSpace {
 					break
 				}
-				mytop -= LollipopRadius * 3
+				mytop -= int(0.5 + (pops[pj].Radius() * 3.0))
 			}
 			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%d" y2="%d" stroke="#BABDB6" stroke-width="2"/>`, spos, spos, mytop, popbot)
-			fmt.Fprintf(w, `<a xlink:title="%s"><circle cx="%f" cy="%d" r="%d" fill="%s" /></a>`,
-				changelist[-pop.Pri], spos, mytop, LollipopRadius, pop.Col)
+			fmt.Fprintf(w, `<a xlink:title="%s"><circle cx="%f" cy="%d" r="%f" fill="%s" /></a>`,
+				changelist[-pop.Pri], spos, mytop, pop.Radius(), pop.Col)
 
 			if *showLabels {
 				fmt.Fprintf(w, `<g transform="translate(%f,%d) rotate(-30)">`,
 					spos, mytop)
 				chg := changelist[-pop.Pri]
+				if pop.Cnt > 1 {
+					chg = fmt.Sprintf("%s (%d)", chg, pop.Cnt)
+				}
 				fmt.Fprintf(w, `<text style="font-size:10px;font-family:sans-serif;fill:#555;" text-anchor="middle" x="0" y="%f">%s</text></g>`,
-					(LollipopRadius * -1.5), chg)
+					(pop.Radius() * -1.5), chg)
 			}
 		}
 	}
