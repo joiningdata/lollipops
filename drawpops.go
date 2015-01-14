@@ -169,8 +169,8 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 	}
 
 	ticks := []Tick{
-		Tick{0, 0, ""},           // start isn't very important (0 is implied) // wrote in new field - Jim H.
-		Tick{int(aaLen), 99, ""}, // always draw the length in the axis // wrote in new field - Jim H.
+		Tick{Pos: 0, Pri: 0},           // start isn't very important (0 is implied)
+		Tick{Pos: int(aaLen), Pri: 99}, // always draw the length in the axis
 	}
 
 	fmt.Fprintf(w, svgHeader, GraphicWidth, ht)
@@ -182,7 +182,7 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 
 		// draw lollipops
 		for pi, pop := range pops {
-			ticks = append(ticks, Tick{pop.Pos, 10, ""})
+			ticks = append(ticks, Tick{Pos: pop.Pos, Pri: 10})
 			spos := Padding + (float64(pop.Pos) * scale)
 
 			mytop := poptop
@@ -244,8 +244,8 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 
 				tstart, _ := r.Start.Int64()
 				tend, _ := r.End.Int64()
-				ticks = append(ticks, Tick{int(tstart), 1, ""})
-				ticks = append(ticks, Tick{int(tend), 1, ""})
+				ticks = append(ticks, Tick{Pos: int(tstart), Pri: 1})
+				ticks = append(ticks, Tick{Pos: int(tend), Pri: 1})
 			}
 			fmt.Fprintln(w, `</a>`)
 		}
@@ -256,8 +256,8 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 		sstart, _ := r.Start.Float64()
 		swidth, _ := r.End.Float64()
 
-		ticks = append(ticks, Tick{int(sstart), 5, ""})
-		ticks = append(ticks, Tick{int(swidth), 5, ""})
+		ticks = append(ticks, Tick{Pos: int(sstart), Pri: 5})
+		ticks = append(ticks, Tick{Pos: int(swidth), Pri: 5})
 
 		sstart *= scale
 		swidth = (swidth * scale) - sstart
