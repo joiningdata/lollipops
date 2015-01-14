@@ -142,8 +142,11 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 				col = *mutColor
 			}
 			if strings.Contains(chg, "#") {
-				col = "#" + strings.SplitN(chg, "#", 2)[1]
+				parts := strings.SplitN(chg, "#", 2)
+				col = "#" + parts[1]
+				chg = parts[0]
 			}
+			changelist[i] = chg
 			fmt.Sscanf(cpos[2], "%d", &spos)
 			pops = append(pops, Tick{spos, -i, col})
 		}
@@ -200,9 +203,6 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 				fmt.Fprintf(w, `<g transform="translate(%f,%d) rotate(-30)">`,
 					spos, mytop)
 				chg := changelist[-pop.Pri]
-				if strings.Contains(chg, "#") {
-					chg = strings.SplitN(chg, "#", 2)[0]
-				}
 				fmt.Fprintf(w, `<text style="font-size:10px;font-family:sans-serif;fill:#555;" text-anchor="middle" x="0" y="%f">%s</text></g>`,
 					(LollipopRadius * -1.5), chg)
 			}
