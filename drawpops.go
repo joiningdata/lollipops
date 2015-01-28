@@ -164,10 +164,11 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicR
 			}
 			changelist[i] = chg
 			fmt.Sscanf(cpos[2], "%d", &spos)
-			if idx, f := popMatch[chg]; f {
+			col = strings.ToLower(col)
+			if idx, f := popMatch[chg+col]; f {
 				pops[idx].Cnt += cnt
 			} else {
-				popMatch[chg] = len(pops)
+				popMatch[chg+col] = len(pops)
 				pops = append(pops, Tick{spos, -i, cnt, col})
 			}
 		}
