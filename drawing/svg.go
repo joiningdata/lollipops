@@ -11,7 +11,7 @@ import (
 )
 
 const svgHeader = `<?xml version='1.0'?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="%d" height="%d">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="%f" height="%f">
 <defs>
   <filter id="ds" x="0" y="0">
     <feOffset in="SourceAlpha" dx="2" dy="2" />
@@ -26,25 +26,29 @@ const svgHeader = `<?xml version='1.0'?>
 `
 const svgFooter = `</svg>`
 
+func DrawSVG(w io.Writer, changelist []string, g *data.PfamGraphicResponse) {
+	DefaultSettings.DrawSVG(w, changelist, g)
+}
+
 // DrawSVG writes the SVG XML document to w, with the provided changes in changelist
 // and Pfam domain/region information in g. If GraphicWidth=0, the AutoWidth is called
 // to determine the best diagram width to fit all labels.
-func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *data.PfamGraphicResponse) {
-	if GraphicWidth == 0 {
-		GraphicWidth = AutoWidth(g)
+func (s *Settings) DrawSVG(w io.Writer, changelist []string, g *data.PfamGraphicResponse) {
+	if s.GraphicWidth == 0 {
+		s.GraphicWidth = s.AutoWidth(g)
 	}
 	aaLen, _ := g.Length.Int64()
-	scale := float64(GraphicWidth-Padding*2) / float64(aaLen)
-	popSpace := int(float64(LollipopRadius+2) / scale)
+	scale := (s.GraphicWidth - s.Padding*2) / float64(aaLen)
+	popSpace := int((s.LollipopRadius + 2) / scale)
 	aaSpace := int(20 / scale)
-	startY := Padding
-	if *showLabels {
-		startY += Padding // add some room for labels
+	startY := s.Padding
+	if s.ShowLabels {
+		startY += s.Padding // add some room for labels
 	}
 
 	pops := TickSlice{}
-	col := *synColor
-	ht := GraphicHeight
+	col := s.SynonymousColor
+	ht := s.DomainHeight + s.Padding*2
 	if len(changelist) > 0 {
 		popMatch := make(map[string]int)
 		// parse changelist and check if lollipops need staggered
@@ -52,9 +56,9 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *data.PfamGra
 			cnt := 1
 			cpos := stripChangePos.FindStringSubmatch(chg)
 			spos := 0
-			col = *synColor
+			col = s.SynonymousColor
 			if cpos[3] != "" && cpos[3] != "=" && cpos[3] != cpos[1] {
-				col = *mutColor
+				col = s.MutationColor
 			}
 			if strings.Contains(chg, "@") {
 				parts := strings.SplitN(chg, "@", 2)
@@ -77,24 +81,24 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *data.PfamGra
 			}
 		}
 		sort.Sort(pops)
-		maxStaggered := LollipopRadius + LollipopHeight
+		maxStaggered := s.LollipopRadius + s.LollipopHeight
 		for pi, pop := range pops {
-			h := LollipopRadius + LollipopHeight
+			h := s.LollipopRadius + s.LollipopHeight
 			for pj := pi + 1; pj < len(pops); pj++ {
 				if pops[pj].Pos-pop.Pos > popSpace {
 					break
 				}
-				h += int(0.5 + (pop.Radius() * 3.0))
+				h += 0.5 + (pop.Radius(s) * 3.0)
 			}
 			if h > maxStaggered {
 				maxStaggered = h
 			}
 		}
 		ht += maxStaggered
-		startY += maxStaggered - (LollipopRadius + LollipopHeight)
+		startY += maxStaggered - (s.LollipopRadius + s.LollipopHeight)
 	}
-	if !*hideAxis {
-		ht += AxisPadding + AxisHeight
+	if !s.HideAxis {
+		ht += s.AxisPadding + s.AxisHeight
 	}
 
 	ticks := []Tick{
@@ -102,58 +106,58 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *data.PfamGra
 		Tick{Pos: int(aaLen), Pri: 99}, // always draw the length in the axis
 	}
 
-	fmt.Fprintf(w, svgHeader, GraphicWidth, ht)
+	fmt.Fprintf(w, svgHeader, s.GraphicWidth, ht)
 
 	if len(pops) > 0 {
-		poptop := startY + LollipopRadius
-		popbot := poptop + LollipopHeight
-		startY = popbot - (DomainHeight-BackboneHeight)/2
+		poptop := startY + s.LollipopRadius
+		popbot := poptop + s.LollipopHeight
+		startY = popbot - (s.DomainHeight-s.BackboneHeight)/2
 
 		// draw lollipops
 		for pi, pop := range pops {
 			ticks = append(ticks, Tick{Pos: pop.Pos, Pri: 10})
-			spos := Padding + (float64(pop.Pos) * scale)
+			spos := s.Padding + (float64(pop.Pos) * scale)
 
 			mytop := poptop
 			for pj := pi + 1; pj < len(pops); pj++ {
 				if pops[pj].Pos-pop.Pos > popSpace {
 					break
 				}
-				mytop -= int(0.5 + (pops[pj].Radius() * 3.0))
+				mytop -= 0.5 + (pops[pj].Radius(s) * 3.0)
 			}
-			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%d" y2="%d" stroke="#BABDB6" stroke-width="2"/>`, spos, spos, mytop, popbot)
-			fmt.Fprintf(w, `<a xlink:title="%s"><circle cx="%f" cy="%d" r="%f" fill="%s" /></a>`,
-				changelist[-pop.Pri], spos, mytop, pop.Radius(), pop.Col)
+			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%f" y2="%f" stroke="#BABDB6" stroke-width="2"/>`, spos, spos, mytop, popbot)
+			fmt.Fprintf(w, `<a xlink:title="%s"><circle cx="%f" cy="%f" r="%f" fill="%s" /></a>`,
+				changelist[-pop.Pri], spos, mytop, pop.Radius(s), pop.Col)
 
-			if *showLabels {
-				fmt.Fprintf(w, `<g transform="translate(%f,%d) rotate(-30)">`,
+			if s.ShowLabels {
+				fmt.Fprintf(w, `<g transform="translate(%f,%f) rotate(-30)">`,
 					spos, mytop)
 				chg := changelist[-pop.Pri]
 				if pop.Cnt > 1 {
 					chg = fmt.Sprintf("%s (%d)", chg, pop.Cnt)
 				}
 				fmt.Fprintf(w, `<text style="font-size:10px;font-family:sans-serif;fill:#555;" text-anchor="middle" x="0" y="%f">%s</text></g>`,
-					(pop.Radius() * -1.5), chg)
+					(pop.Radius(s) * -1.5), chg)
 			}
 		}
 	}
 
 	// draw the backbone
-	fmt.Fprintf(w, `<a xlink:title="%s, %s (%daa)"><rect fill="#BABDB6" x="%d" y="%d" width="%d" height="%d"/></a>`,
+	fmt.Fprintf(w, `<a xlink:title="%s, %s (%daa)"><rect fill="#BABDB6" x="%f" y="%f" width="%f" height="%f"/></a>`,
 		g.Metadata.Identifier, g.Metadata.Description, aaLen,
-		Padding, startY+(DomainHeight-BackboneHeight)/2, GraphicWidth-(Padding*2), BackboneHeight)
+		s.Padding, startY+(s.DomainHeight-s.BackboneHeight)/2, s.GraphicWidth-(s.Padding*2), s.BackboneHeight)
 
 	disFill := "url(#disordered-hatch)"
-	if *forPDF {
+	if s.SolidFillOnly {
 		disFill = `#000;" opacity="0.15`
 	}
-	if !*hideMotifs {
+	if !s.HideMotifs {
 		// draw transmembrane, signal peptide, coiled-coil, etc motifs
 		for _, r := range g.Motifs {
 			if r.Type == "pfamb" {
 				continue
 			}
-			if r.Type == "disorder" && *hideDisordered {
+			if r.Type == "disorder" && s.HideDisordered {
 				continue
 			}
 			sstart, _ := r.Start.Float64()
@@ -165,11 +169,11 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *data.PfamGra
 			fmt.Fprintf(w, `<a xlink:title="%s">`, r.Type)
 			if r.Type == "disorder" {
 				// draw disordered regions with a understated diagonal hatch pattern
-				fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%d" width="%f" height="%d"/>`, disFill,
-					Padding+sstart, startY+(DomainHeight-BackboneHeight)/2, swidth, BackboneHeight)
+				fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%f" width="%f" height="%f"/>`, disFill,
+					s.Padding+sstart, startY+(s.DomainHeight-s.BackboneHeight)/2, swidth, s.BackboneHeight)
 			} else {
-				fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%d" width="%f" height="%d" filter="url(#ds)"/>`, BlendColorStrings(r.Color, "#FFFFFF"),
-					Padding+sstart, startY+(DomainHeight-MotifHeight)/2, swidth, MotifHeight)
+				fmt.Fprintf(w, `<rect fill="%s" x="%f" y="%f" width="%f" height="%f" filter="url(#ds)"/>`, BlendColorStrings(r.Color, "#FFFFFF"),
+					s.Padding+sstart, startY+(s.DomainHeight-s.MotifHeight)/2, swidth, s.MotifHeight)
 
 				tstart, _ := r.Start.Int64()
 				tend, _ := r.End.Int64()
@@ -191,14 +195,14 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *data.PfamGra
 		sstart *= scale
 		swidth = (swidth * scale) - sstart
 
-		fmt.Fprintf(w, `<g transform="translate(%f,%d)"><a xlink:href="%s" xlink:title="%s">`, Padding+sstart, startY, "http://pfam.xfam.org"+r.Link, r.Metadata.Description)
-		fmt.Fprintf(w, `<rect fill="%s" x="0" y="0" width="%f" height="%d" filter="url(#ds)"/>`, r.Color, swidth, DomainHeight)
+		fmt.Fprintf(w, `<g transform="translate(%f,%f)"><a xlink:href="%s" xlink:title="%s">`, s.Padding+sstart, startY, "http://pfam.xfam.org"+r.Link, r.Metadata.Description)
+		fmt.Fprintf(w, `<rect fill="%s" x="0" y="0" width="%f" height="%f" filter="url(#ds)"/>`, r.Color, swidth, s.DomainHeight)
 		if swidth > 10 {
-			if len(r.Metadata.Description) > 1 && float64(MeasureFont(r.Metadata.Description, 12)) < (swidth-TextPadding) {
+			if len(r.Metadata.Description) > 1 && float64(MeasureFont(r.Metadata.Description, 12)) < (swidth-s.TextPadding) {
 				// we can fit the full description! nice!
-				fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, r.Metadata.Description)
-			} else if float64(MeasureFont(r.Text, 12)) < (swidth - TextPadding) {
-				fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, r.Text)
+				fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%f">%s</text>`, swidth/2.0, 4+s.DomainHeight/2, r.Metadata.Description)
+			} else if float64(MeasureFont(r.Text, 12)) < (swidth - s.TextPadding) {
+				fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%f">%s</text>`, swidth/2.0, 4+s.DomainHeight/2, r.Text)
 			} else {
 				didOutput := false
 				if strings.IndexFunc(r.Text, unicode.IsPunct) != -1 {
@@ -218,8 +222,8 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *data.PfamGra
 						if i == 0 {
 							pre = ""
 						}
-						if float64(MeasureFont(pre+parts[i]+post, 12)) < (swidth - TextPadding) {
-							fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, pre+parts[i]+post)
+						if float64(MeasureFont(pre+parts[i]+post, 12)) < (swidth - s.TextPadding) {
+							fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%f">%s</text>`, swidth/2.0, 4+s.DomainHeight/2, pre+parts[i]+post)
 							didOutput = true
 							break
 						}
@@ -231,23 +235,23 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *data.PfamGra
 					sub := r.Text
 					for mx := len(r.Text) - 2; mx > 0; mx-- {
 						sub = strings.TrimFunc(r.Text[:mx], unicode.IsPunct) + ".."
-						if float64(MeasureFont(sub, 12)) < (swidth - TextPadding) {
+						if float64(MeasureFont(sub, 12)) < (swidth - s.TextPadding) {
 							break
 						}
 					}
 
-					fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%d">%s</text>`, swidth/2.0, 4+DomainHeight/2, sub)
+					fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%f">%s</text>`, swidth/2.0, 4+s.DomainHeight/2, sub)
 				}
 			}
 		}
 		fmt.Fprintln(w, `</a></g>`)
 	}
 
-	if !*hideAxis {
-		startY += DomainHeight + AxisPadding
+	if !s.HideAxis {
+		startY += s.DomainHeight + s.AxisPadding
 		fmt.Fprintln(w, `<g class="axis">`)
-		fmt.Fprintf(w, `<line x1="%d" x2="%d" y1="%d" y2="%d" stroke="#AAAAAA" />`, Padding, GraphicWidth-Padding, startY, startY)
-		fmt.Fprintf(w, `<line x1="%d" x2="%d" y1="%d" y2="%d" stroke="#AAAAAA" />`, Padding, Padding, startY, startY+(AxisHeight/3))
+		fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%f" y2="%f" stroke="#AAAAAA" />`, s.Padding, s.GraphicWidth-s.Padding, startY, startY)
+		fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%f" y2="%f" stroke="#AAAAAA" />`, s.Padding, s.Padding, startY, startY+(s.AxisHeight/3))
 
 		ts := TickSlice(ticks)
 		sort.Sort(ts)
@@ -261,9 +265,9 @@ func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *data.PfamGra
 				continue
 			}
 			lastDrawn = t.Pos
-			x := Padding + (float64(t.Pos) * scale)
-			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%d" y2="%d" stroke="#AAAAAA" />`, x, x, startY, startY+(AxisHeight/3))
-			fmt.Fprintf(w, `<text style="font-size:10px;font-family:sans-serif;fill:#000000;" text-anchor="middle" x="%f" y="%d">%d</text>`, x, startY+AxisHeight, t.Pos)
+			x := s.Padding + (float64(t.Pos) * scale)
+			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%f" y2="%f" stroke="#AAAAAA" />`, x, x, startY, startY+(s.AxisHeight/3))
+			fmt.Fprintf(w, `<text style="font-size:10px;font-family:sans-serif;fill:#000000;" text-anchor="middle" x="%f" y="%f">%d</text>`, x, startY+s.AxisHeight, t.Pos)
 		}
 
 		fmt.Fprintln(w, "</g>")

@@ -53,7 +53,7 @@ func BlendColorStrings(a, b string) string {
 
 // AutoWidth automatically determines the best width to use to fit all
 // available domain names into the plot.
-func AutoWidth(g *data.PfamGraphicResponse) int {
+func (s *Settings) AutoWidth(g *data.PfamGraphicResponse) float64 {
 	aaLen, _ := g.Length.Float64()
 	w := 400.0
 
@@ -62,19 +62,19 @@ func AutoWidth(g *data.PfamGraphicResponse) int {
 		send, _ := r.End.Float64()
 
 		aaPart := (send - sstart) / aaLen
-		minTextWidth := MeasureFont(r.Text, 12) + (TextPadding * 2) + 1
+		minTextWidth := float64(MeasureFont(r.Text, 12)) + (s.TextPadding * 2) + 1
 
-		ww := (float64(minTextWidth) / aaPart)
+		ww := minTextWidth / aaPart
 		if ww > w {
 			w = ww
 		}
 	}
-	return int(w + (Padding * 2))
+	return w + (s.Padding * 2)
 }
 
-func (t *Tick) Radius() float64 {
+func (t *Tick) Radius(s *Settings) float64 {
 	if t.Cnt <= 1 {
-		return LollipopRadius
+		return s.LollipopRadius
 	}
-	return math.Sqrt(math.Log(float64(2+t.Cnt)) * LollipopRadius * LollipopRadius)
+	return math.Sqrt(math.Log(float64(2+t.Cnt)) * s.LollipopRadius * s.LollipopRadius)
 }

@@ -14,6 +14,15 @@ var (
 	output  = flag.String("o", "", "output SVG file (default GENE_SYMBOL.svg)")
 	width   = flag.Int("w", 0, "SVG output width (default automatic fit labels)")
 
+	showLabels     = flag.Bool("labels", false, "draw mutation labels above lollipops")
+	hideDisordered = flag.Bool("hide-disordered", false, "do not draw disordered regions")
+	hideMotifs     = flag.Bool("hide-motifs", false, "do not draw motifs")
+	hideAxis       = flag.Bool("hide-axis", false, "do not draw the aa position axis")
+	forPDF         = flag.Bool("for-pdf", false, "use solid fill instead of patterns for PDF output")
+
+	synColor = flag.String("syn-color", "#0000ff", "color to use for synonymous lollipops")
+	mutColor = flag.String("mut-color", "#ff0000", "color to use for non-synonymous lollipops")
+
 	arialPath *string
 )
 
@@ -29,8 +38,16 @@ func main() {
 	}
 
 	flag.Parse()
+	drawing.DefaultSettings.ShowLabels = *showLabels
+	drawing.DefaultSettings.HideDisordered = *hideDisordered
+	drawing.DefaultSettings.HideMotifs = *hideMotifs
+	drawing.DefaultSettings.HideAxis = *hideAxis
+	drawing.DefaultSettings.SolidFillOnly = *forPDF
+	drawing.DefaultSettings.SynonymousColor = *synColor
+	drawing.DefaultSettings.MutationColor = *mutColor
+	drawing.DefaultSettings.GraphicWidth = float64(*width)
 
-	if *arialPath != "" {
+	if arialPath != nil && *arialPath != "" {
 		err := drawing.LoadFontPath(*arialPath)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -91,5 +108,5 @@ func main() {
 	defer f.Close()
 
 	fmt.Fprintln(os.Stderr, "Drawing diagram to", *output)
-	drawing.DrawSVG(f, *width, flag.Args()[varStart:], data)
+	drawing.DrawSVG(f, flag.Args()[varStart:], data)
 }
