@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -14,7 +15,7 @@ const BiomartXML = `<!DOCTYPE Query><Query client="github.com/pbnjay/lollipops" 
 	<Dataset name="hsapiens_gene_ensembl" config="gene_ensembl_config">
 	<Filter name="with_uniprotswissprot" value="only" filter_list=""/>
 	<Filter name="hgnc_symbol" value="%s" filter_list=""/>
-	<Attribute name="uniprot_swissprot_accession"/>
+	<Attribute name="uniprot_swissprot"/>
 </Dataset></Query>`
 
 const BiomartResultURL = "http://central.biomart.org/martservice/results"
@@ -50,8 +51,8 @@ type PfamGraphicResponse struct {
 }
 
 func GetProtID(symbol string) (string, error) {
-	query := fmt.Sprintf(BiomartXML, symbol)
-	resp, err := http.Post(BiomartResultURL, "text/xml",
+	query := url.QueryEscape(fmt.Sprintf(BiomartXML, symbol))
+	resp, err := http.Post(BiomartResultURL, "application/x-www-form-urlencoded",
 		bytes.NewBufferString("query="+query))
 	if err != nil {
 		return "", err
