@@ -4,6 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/pbnjay/lollipops/data"
+	"github.com/pbnjay/lollipops/drawing"
 )
 
 var (
@@ -30,7 +33,7 @@ func main() {
 
 		fmt.Fprintln(os.Stderr, "HGNC Symbol: ", flag.Arg(0))
 
-		acc, err = GetProtID(flag.Arg(0))
+		acc, err = data.GetProtID(flag.Arg(0))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -48,7 +51,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	data, err := GetPfamGraphicData(acc)
+	data, err := data.GetPfamGraphicData(acc)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -70,5 +73,5 @@ func main() {
 	defer f.Close()
 
 	fmt.Fprintln(os.Stderr, "Drawing diagram to", *output)
-	DrawSVG(f, *width, flag.Args()[varStart:], data)
+	drawing.DrawSVG(f, *width, flag.Args()[varStart:], data)
 }

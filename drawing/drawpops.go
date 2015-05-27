@@ -1,4 +1,4 @@
-package main
+package drawing
 
 import (
 	"flag"
@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strings"
 	"unicode"
+
+	"github.com/pbnjay/lollipops/data"
 )
 
 var (
@@ -96,7 +98,7 @@ func BlendColorStrings(a, b string) string {
 
 // AutoWidth automatically determines the best width to use to fit all
 // available domain names into the plot.
-func AutoWidth(g *PfamGraphicResponse) int {
+func AutoWidth(g *data.PfamGraphicResponse) int {
 	aaLen, _ := g.Length.Float64()
 	w := 400.0
 
@@ -125,7 +127,7 @@ func (t *Tick) Radius() float64 {
 // DrawSVG writes the SVG XML document to w, with the provided changes in changelist
 // and Pfam domain/region information in g. If GraphicWidth=0, the AutoWidth is called
 // to determine the best diagram width to fit all labels.
-func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *PfamGraphicResponse) {
+func DrawSVG(w io.Writer, GraphicWidth int, changelist []string, g *data.PfamGraphicResponse) {
 	if GraphicWidth == 0 {
 		GraphicWidth = AutoWidth(g)
 	}
