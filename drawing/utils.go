@@ -62,6 +62,9 @@ func BlendColorStrings(a, b string) string {
 func (s *Settings) AutoWidth(g *data.PfamGraphicResponse) float64 {
 	aaLen, _ := g.Length.Float64()
 	w := 400.0
+	if s.dpi != 0 {
+		w *= s.dpi / 72.0
+	}
 
 	for _, r := range g.Regions {
 		sstart, _ := r.Start.Float64()

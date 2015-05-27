@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/pbnjay/lollipops/data"
 	"github.com/pbnjay/lollipops/drawing"
@@ -11,8 +12,9 @@ import (
 
 var (
 	uniprot = flag.String("U", "", "Uniprot accession instead of GENE_SYMBOL")
-	output  = flag.String("o", "", "output SVG file (default GENE_SYMBOL.svg)")
-	width   = flag.Int("w", 0, "SVG output width (default automatic fit labels)")
+	output  = flag.String("o", "", "output SVG/PNG file (default GENE_SYMBOL.svg)")
+	width   = flag.Int("w", 0, "output width (default automatic fit labels)")
+	dpi     = flag.Float64("dpi", 72, "output DPI for PNG rasterization")
 
 	showLabels     = flag.Bool("labels", false, "draw mutation labels above lollipops")
 	hideDisordered = flag.Bool("hide-disordered", false, "do not draw disordered regions")
@@ -108,5 +110,10 @@ func main() {
 	defer f.Close()
 
 	fmt.Fprintln(os.Stderr, "Drawing diagram to", *output)
-	drawing.DrawSVG(f, flag.Args()[varStart:], data)
+	if strings.HasSuffix(strings.ToLower(*output), ".png") {
+		drawing.DrawPNG(f, *dpi, flag.Args()[varStart:], data)
+	} else {
+		drawing.DrawSVG(f, flag.Args()[varStart:], data)
+	}
+
 }

@@ -44,6 +44,8 @@ type Settings struct {
 
 	// GraphicHeight is automatically determined based on configured options.
 	GraphicHeight float64
+
+	dpi float64
 }
 
 // DefaultSettings contains the "standard" diagram output config and is used by
