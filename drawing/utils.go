@@ -16,6 +16,12 @@ type Tick struct {
 	Pri int
 	Cnt int
 	Col string
+
+	isLollipop bool
+	label      string
+	x          float64
+	y          float64
+	r          float64
 }
 
 type TickSlice []Tick
