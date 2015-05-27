@@ -1,10 +1,7 @@
 package drawing
 
 import (
-	"flag"
-	"fmt"
 	"io/ioutil"
-	"os"
 
 	"code.google.com/p/jamslam-freetype-go/freetype"
 )
@@ -28,19 +25,27 @@ func init() {
 		"/usr/share/fonts/truetype/msttcorefonts/arial.ttf",
 	}
 	for _, path := range popularpaths {
-		fontBytes, err := ioutil.ReadFile(path)
+		err := LoadFontPath(path)
 		if err == nil {
-			arialFont, err := freetype.ParseFont(fontBytes)
-			if err == nil {
-				fontContext = freetype.NewContext()
-				fontContext.SetFont(arialFont)
-				return
-			}
+			return
 		}
 	}
+}
 
-	fmt.Fprintln(os.Stderr, "can't find arial.ttf - for more accurate font sizing use -f=/path/to/arial.ttf")
-	arialPath = flag.String("f", "", "path to arial.ttf")
+func FontLoaded() bool {
+	return fontContext != nil
+}
+
+func LoadFontPath(path string) error {
+	fontBytes, err := ioutil.ReadFile(path)
+	if err == nil {
+		arialFont, err := freetype.ParseFont(fontBytes)
+		if err == nil {
+			fontContext = freetype.NewContext()
+			fontContext.SetFont(arialFont)
+		}
+	}
+	return err
 }
 
 // MeasureFont returns the pixel width of the string s at font size sz.

@@ -13,6 +13,8 @@ var (
 	uniprot = flag.String("U", "", "Uniprot accession instead of GENE_SYMBOL")
 	output  = flag.String("o", "", "output SVG file (default GENE_SYMBOL.svg)")
 	width   = flag.Int("w", 0, "SVG output width (default automatic fit labels)")
+
+	arialPath *string
 )
 
 func main() {
@@ -21,7 +23,23 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Where options are:")
 		flag.PrintDefaults()
 	}
+
+	if !drawing.FontLoaded() {
+		arialPath = flag.String("f", "", "path to arial.ttf")
+	}
+
 	flag.Parse()
+
+	if *arialPath != "" {
+		err := drawing.LoadFontPath(*arialPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}
+
+	if !drawing.FontLoaded() {
+		fmt.Fprintln(os.Stderr, "can't find arial.ttf - for more accurate font sizing use -f=/path/to/arial.ttf")
+	}
 
 	var err error
 	varStart := 0
