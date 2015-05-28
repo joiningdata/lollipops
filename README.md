@@ -82,3 +82,32 @@ download the latest version for your system in a simple command-line executable.
 
 If you already have Go installed and want the bleeding edge, just
 ``go get -u github.com/pbnjay/lollipops`` to download the latest version.
+
+##Embedding
+
+As of v0.97, lollipops is now easy to embed in other Go applications. The following code prints an SVG for TP53 and some mutations to standard output:
+
+```go
+package main
+
+import (
+    "os"
+
+    "github.com/pbnjay/lollipops/data"
+    "github.com/pbnjay/lollipops/drawing"
+)
+
+func main() {
+    uniprot_id := "P04637"
+    mutations := []string{"R273C", "R175H", "T125@5", "R248Q#7f3333@131"}
+
+    p53_domains, err := data.GetPfamGraphicData(uniprot_id)
+    if err != nil {
+        panic(err)
+    }
+
+    drawing.DrawSVG(os.Stdout, mutations, p53_domains)
+}
+
+```
+
