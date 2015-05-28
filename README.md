@@ -1,5 +1,4 @@
-lollipops
----------
+#lollipops
 
 A simple 'lollipop' mutation diagram generator that tries to make things
 simple and easy by automating as much as possible. It uses the
@@ -9,8 +8,7 @@ Gene Symbols into Uniprot/SwissProt Accession number. If variant changes
 are provided, it will also annotate them to the diagram using the
 "lollipops" markers that give the tool it's name.
 
-Example
--------
+##Example
 
 Basic usage is just the gene symbol (ex: ``TP53``) and a list of
 mutations (ex: ``R273C R175H T125 R248Q``)
@@ -27,36 +25,57 @@ labels and more:
 
 ![TP53 Lollipop diagram with 5 customized mutations](tp53_more.png?raw=true)
 
-Usage
------
+##Usage
 
-Usage: ``lollipops [options] GENE_SYMBOL [PROTEIN CHANGES ...]``
+Usage: ``lollipops [options] {-U UNIPROT_ID | GENE_SYMBOL} [PROTEIN CHANGES ...]``
 
-Where ``GENE_SYMBOL`` is the official HGNC symbol and ``PROTEIN CHANGES``
-is a list of amino acid changes of the format "(amino-code)(position)..."
-Amino-code can be either the 1- or 3-character code for the amino acid.
-Only the first position in each change is used for plotting even if the
-change contains a range. All characters after the position are ignored.
-Protein changes may also be appended with a hex color code (seen in
-example above) to alter the lollipop color for each specific mutation.
+Where **GENE_SYMBOL** is the official human HGNC gene symbol. This will use the
+BioMart API to lookup the **UNIPROT_ID**. To skip the lookup or use other species,
+specify the UniProt ID with -U (e.g. ``-U P04637`` for TP53)
 
-    -o=out.svg         SVG output filename (default GENE_SYMBOL.svg)
-    -labels            draw labels for each mutation
-    -hide-axis         do not draw the aa position axis
-    -hide-disordered   do not draw disordered regions
-    -hide-motifs       do not draw motifs
-    -w=700             SVG output width (default=automatic)
-    -mut-color=#ff0000 color to use for non-synonymous lollipops
-    -syn-color=#0000ff color to use for synonymous lollipops
+####Protein changes
 
-If you are working with non-human data, or know the Uniprot Accession
-already, You can specify it with `-U UNIPROTID` instead of GENE_SYMBOL,
-for example the following mouse query works for gene `Mobp`:
+Currently only point mutations are supported, and may be specified as:
 
-    ./lollipops -U Q9D2P8
+    <AMINO><CODON><AMINO><#COLOR><@COUNT>
 
-Installation
-------------
+Only CODON is required, and AMINO tags are not parsed.
+
+Synonymous mutations are denoted if the first AMINO tag matches the second
+AMINO tag, or if the second tag is not present. Otherwise the non-synonymous
+mutation color is used. The COLOR tag will override using the #RRGGBB style
+provided. The COUNT tag can be used to scale the lollipop marker size so that
+the area is exponentially proportional to the count indicated. Examples:
+
+    R273C            -- non-synonymous mutation at codon 273
+    T125@5           -- synonymous mutation at codon 125 with "5x" marker sizing
+    R248Q#00ff00     -- green lollipop at codon 248
+    R248Q#00ff00@131 -- green lollipop at codon 248 with "131x" marker sizing
+
+**N.B.** Color must come before count in tags.
+
+####Diagram generation options
+
+```
+  -syn-color="#0000ff"    color to use for synonymous mutation markers
+  -mut-color="#ff0000"    color to use for non-synonymous mutation markers
+  -hide-axis              do not draw the amino position x-axis
+  -hide-disordered        do not draw disordered regions on the backbone
+  -hide-motifs            do not draw simple motif regions
+  -labels                 draw label text above lollipop markers
+  -no-patterns            use solid fill instead of patterns (SVG only)
+```
+
+####Output options
+
+```
+  -o=filename.png         set output filename (.png or .svg supported)
+  -w=700                  set diagram pixel width (default = automatic fit)
+  -dpi=300                set DPI (PNG output only)
+```
+
+
+##Installation
 
 Head over to the [Releases](https://github.com/pbnjay/lollipops/releases) to
 download the latest version for your system in a simple command-line executable.
