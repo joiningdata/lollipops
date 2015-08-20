@@ -44,11 +44,14 @@ func (s *Settings) prepare(changelist []string, g *data.PfamGraphicResponse) *di
 		popMatch := make(map[string]int)
 		// parse changelist and check if lollipops need staggered
 		for i, chg := range changelist {
+			if chg == "" {
+				continue
+			}
 			cnt := 1
 			cpos := stripChangePos.FindStringSubmatch(chg)
 			spos := 0
 			col = s.SynonymousColor
-			if cpos[3] != "" && cpos[3] != "=" && cpos[3] != cpos[1] {
+			if len(cpos) == 4 && (cpos[3] != "" && cpos[3] != "=" && cpos[3] != cpos[1]) {
 				col = s.MutationColor
 			}
 			if strings.Contains(chg, "@") {

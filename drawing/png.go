@@ -14,6 +14,7 @@ import (
 )
 
 func DrawPNG(w io.Writer, dpi float64, changelist []string, g *data.PfamGraphicResponse) {
+	DefaultSettings.dpi = 0
 	DefaultSettings.DrawPNG(w, dpi, changelist, g)
 }
 
