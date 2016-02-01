@@ -114,7 +114,9 @@ Output options:
 	}
 
 	if !drawing.FontLoaded() {
-		fmt.Fprintln(os.Stderr, "WARNING: unable to find Arial.ttf - for more accurate font sizing add -f=/path/to/arial.ttf")
+		fmt.Fprintln(os.Stderr, "ERROR: Unable to find Arial.ttf - Required for accurate font sizing.")
+		fmt.Fprintln(os.Stderr, "       Please use -f=/path/to/arial.ttf or the TTF font of your choice.")
+		os.Exit(1)
 	}
 
 	var err error
