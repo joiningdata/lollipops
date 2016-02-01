@@ -30,7 +30,7 @@ labels and more:
 Usage: ``lollipops [options] {-U UNIPROT_ID | GENE_SYMBOL} [PROTEIN CHANGES ...]``
 
 Where **GENE_SYMBOL** is the official human HGNC gene symbol. This will use the
-BioMart API to lookup the **UNIPROT_ID**. To skip the lookup or use other species,
+official API to lookup the **UNIPROT_ID**. To skip the lookup or use other species,
 specify the UniProt ID with -U (e.g. ``-U P04637`` for TP53)
 
 ####Protein changes
