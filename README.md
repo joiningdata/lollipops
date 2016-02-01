@@ -1,5 +1,7 @@
 #lollipops
 
+[![DOI](https://zenodo.org/badge/20224/pbnjay/lollipops.svg)](https://zenodo.org/badge/latestdoi/20224/pbnjay/lollipops)
+
 A simple 'lollipop' mutation diagram generator that tries to make things
 simple and easy by automating as much as possible. It uses the
 [Pfam API](http://pfam.xfam.org/help#tabview=tab9) to retrieve domains and
