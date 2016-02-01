@@ -3,10 +3,10 @@
 A simple 'lollipop' mutation diagram generator that tries to make things
 simple and easy by automating as much as possible. It uses the
 [Pfam API](http://pfam.xfam.org/help#tabview=tab9) to retrieve domains and
-colors, and the [BioMart API](http://www.biomart.org/) to translate HGNC
-Gene Symbols into Uniprot/SwissProt Accession number. If variant changes
-are provided, it will also annotate them to the diagram using the
-"lollipops" markers that give the tool it's name.
+colors, and the [UniProt REST API](http://www.uniprot.org/uploadlists/) to
+translate HGNC Gene Symbols into Uniprot/SwissProt Accession number. If
+variant changes are provided, it will also annotate them to the diagram
+using the "lollipops" markers that give the tool it's name.
 
 ##Example
 

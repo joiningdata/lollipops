@@ -18,24 +18,16 @@
 package data
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 )
 
-// BiomartXML is the query used to translate HGNC Symbol into Uniprot/SwissProt Accession
-const BiomartXML = `<!DOCTYPE Query><Query client="github.com/pbnjay/lollipops" processor="TSV" limit="-1" header="0">
-	<Dataset name="hsapiens_gene_ensembl" config="gene_ensembl_config">
-	<Filter name="with_uniprotswissprot" value="only" filter_list=""/>
-	<Filter name="hgnc_symbol" value="%s" filter_list=""/>
-	<Attribute name="uniprot_swissprot"/>
-</Dataset></Query>`
-
-const BiomartResultURL = "http://central.biomart.org/martservice/results"
 const PfamGraphicURL = "http://pfam.xfam.org/protein/%s/graphic"
 
 // PfamGraphicFeature is a generic representation of various Pfam feature responses
@@ -67,24 +59,6 @@ type PfamGraphicResponse struct {
 	Regions  []PfamGraphicFeature `json:"regions"`
 }
 
-func GetProtID(symbol string) (string, error) {
-	query := url.QueryEscape(fmt.Sprintf(BiomartXML, symbol))
-	resp, err := http.Post(BiomartResultURL, "application/x-www-form-urlencoded",
-		bytes.NewBufferString("query="+query))
-	if err != nil {
-		return "", err
-	}
-	respBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("biomart error: %s", resp.Status)
-	}
-	respText := string(respBytes)
-	return strings.TrimSpace(respText), nil
-}
-
 func GetPfamGraphicData(accession string) (*PfamGraphicResponse, error) {
 	queryURL := fmt.Sprintf(PfamGraphicURL, accession)
 	resp, err := http.Get(queryURL)
@@ -109,4 +83,44 @@ func GetPfamGraphicData(accession string) (*PfamGraphicResponse, error) {
 	}
 	r := data[0]
 	return &r, nil
+}
+
+func GetProtID(symbol string) (string, error) {
+	apiURL := `http://www.uniprot.org/uniprot/?query=` + url.QueryEscape(symbol)
+	apiURL += `+AND+reviewed:yes+AND+organism:9606+AND+database:pfam`
+	apiURL += `&sort=score&columns=id,entry+name,reviewed,genes,organism&format=tab`
+
+	resp, err := http.Get(apiURL)
+	if err != nil {
+		return "", err
+	}
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("uniprot error: %s", resp.Status)
+	}
+	nmatches := 0
+	bestHit := 0
+	protID := ""
+	for _, line := range strings.Split(string(respBytes), "\n") {
+		n := strings.Count(line, symbol)
+		if n >= bestHit {
+			p := strings.SplitN(line, "\t", 2)
+			bestHit = n
+			protID = p[0]
+		}
+		nmatches++
+	}
+	if nmatches > 1 {
+		fmt.Fprintf(os.Stderr, "Uniprot returned %d hits for your gene symbol '%s':\n", nmatches, symbol)
+		fmt.Fprintln(os.Stderr, string(respBytes))
+	}
+	if bestHit == 0 {
+		log.Fatalf("Unable to find protein ID for '%s'", symbol)
+	} else if nmatches > 1 {
+		fmt.Fprintf(os.Stderr, "Selected '%s' as the best match. Use -U XXX to use another ID.\n\n", protID)
+	}
+	return protID, nil
 }
