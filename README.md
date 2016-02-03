@@ -113,3 +113,20 @@ func main() {
 
 ```
 
+# CONTRIBUTING
+
+Please submit your bugs and features requests via the [Issues](https://github.com/pbnjay/lollipops/issues) tab. Be sure to
+search closed issues before submitting a new one in case the issue has been
+previously discussed. Pull Requests are welcome, but please create an issue beforehand
+to discuss significant changes.
+
+Code contributions are expected to be properly formatted with `go fmt`, and generally adhere to the standard [Golang review guidelines](https://github.com/golang/go/wiki/CodeReviewComments).
+
+Many thanks to all our other contributors:
+ - [Jim Havrilla](https://github.com/jimhavrilla) - Initial lollipop color labeling code [PR #3](https://github.com/pbnjay/lollipops/pull/3)
+ - Everyone who has submitted bug reports, feature requests, and shared the project with colleages!
+
+# LICENSE
+
+Lollipops is released under the [GPL license](LICENSE). If your institution requires
+additional licensing options please contact the author.
