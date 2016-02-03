@@ -41,6 +41,7 @@ var (
 	hideMotifs     = flag.Bool("hide-motifs", false, "do not draw motifs")
 	hideAxis       = flag.Bool("hide-axis", false, "do not draw the aa position axis")
 	noPatterns     = flag.Bool("no-patterns", false, "use solid fill instead of patterns for SVG output")
+	domainLabels   = flag.String("domain-labels", "truncated", "how to apply domain labels")
 
 	synColor = flag.String("syn-color", "#0000ff", "color to use for synonymous lollipops")
 	mutColor = flag.String("mut-color", "#ff0000", "color to use for non-synonymous lollipops")
@@ -84,6 +85,9 @@ Diagram generation options:
   -hide-motifs            do not draw simple motif regions
   -labels                 draw label text above lollipop markers
   -no-patterns            use solid fill instead of patterns (SVG only)
+  -domain-labels=fit      hot to apply domain labels (default="truncated")
+                            "fit" = only if fits in space available
+                            "off" = do not draw text in the domains
 
 Output options:
   -o=filename.png         set output filename (.png or .svg supported)
@@ -102,6 +106,7 @@ Output options:
 	drawing.DefaultSettings.HideMotifs = *hideMotifs
 	drawing.DefaultSettings.HideAxis = *hideAxis
 	drawing.DefaultSettings.SolidFillOnly = *noPatterns
+	drawing.DefaultSettings.DomainLabelStyle = *domainLabels
 	drawing.DefaultSettings.SynonymousColor = *synColor
 	drawing.DefaultSettings.MutationColor = *mutColor
 	drawing.DefaultSettings.GraphicWidth = float64(*width)

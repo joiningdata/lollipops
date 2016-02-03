@@ -31,6 +31,11 @@ type Settings struct {
 	// SolidFillOnly ensures no patterns are used in output files.
 	SolidFillOnly bool
 
+	// DomainLabelStyle determines how to deal with domain labels that do not fit
+	// within the colored domain blocks. Values are "off", "fit" (only labels that
+	// fully fit), and "truncated" (default, remove text to fit within).
+	DomainLabelStyle string
+
 	// SynonymousColor is the #RRGGBB color to use for synonymous mutations.
 	SynonymousColor string
 	// MutationColor is the #RRGGBB color to use for non-synonymous mutations.
@@ -73,6 +78,8 @@ var DefaultSettings = Settings{
 	HideMotifs:     false,
 	HideAxis:       false,
 	SolidFillOnly:  false,
+
+	DomainLabelStyle: "truncated",
 
 	SynonymousColor: "#0000ff",
 	MutationColor:   "#ff0000",

@@ -176,13 +176,13 @@ func (s *Settings) prepare(changelist []string, g *data.PfamGraphicResponse) *di
 
 		label := ""
 
-		if swidth > 10 {
+		if swidth > 10 && s.DomainLabelStyle != "off" {
 			if len(r.Metadata.Description) > 1 && float64(MeasureFont(r.Metadata.Description, 12)) < (swidth-s.TextPadding) {
 				// we can fit the full description! nice!
 				label = r.Metadata.Description
 			} else if float64(MeasureFont(r.Text, 12)) < (swidth - s.TextPadding) {
 				label = r.Text
-			} else {
+			} else if s.DomainLabelStyle == "truncate" {
 				didOutput := false
 				if strings.IndexFunc(r.Text, unicode.IsPunct) != -1 {
 
