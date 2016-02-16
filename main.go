@@ -24,6 +24,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/pbnjay/lollipops/data"
@@ -46,7 +47,7 @@ var (
 	synColor = flag.String("syn-color", "#0000ff", "color to use for synonymous lollipops")
 	mutColor = flag.String("mut-color", "#ff0000", "color to use for non-synonymous lollipops")
 
-	arialPath *string
+	fontPath = flag.String("f", "", "Path to truetype font to use for drawing (defaults to Arial.ttf)")
 )
 
 func main() {
@@ -96,10 +97,6 @@ Output options:
 `)
 	}
 
-	if !drawing.FontLoaded() {
-		arialPath = flag.String("f", "", "path to arial.ttf")
-	}
-
 	flag.Parse()
 	drawing.DefaultSettings.ShowLabels = *showLabels
 	drawing.DefaultSettings.HideDisordered = *hideDisordered
@@ -111,17 +108,21 @@ Output options:
 	drawing.DefaultSettings.MutationColor = *mutColor
 	drawing.DefaultSettings.GraphicWidth = float64(*width)
 
-	if arialPath != nil && *arialPath != "" {
-		err := drawing.LoadFontPath(*arialPath)
+	if *fontPath == "" {
+		err := drawing.LoadDefaultFont()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "ERROR: Unable to find Arial.ttf - Which is required for accurate font sizing.")
+			fmt.Fprintln(os.Stderr, "       Please use -f=/path/to/arial.ttf or the TrueType (.ttf) font of your choice.")
+			os.Exit(1)
+		}
+	} else {
+		fname := path.Base(*fontPath)
+		fname = strings.TrimSuffix(fname, path.Ext(fname))
+		err := drawing.LoadFont(fname, *fontPath)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
-	}
-
-	if !drawing.FontLoaded() {
-		fmt.Fprintln(os.Stderr, "ERROR: Unable to find Arial.ttf - Required for accurate font sizing.")
-		fmt.Fprintln(os.Stderr, "       Please use -f=/path/to/arial.ttf or the TTF font of your choice.")
-		os.Exit(1)
 	}
 
 	var err error

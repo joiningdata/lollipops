@@ -18,20 +18,27 @@
 package drawing
 
 import (
+	"fmt"
 	"io/ioutil"
 
-	"code.google.com/p/jamslam-freetype-go/freetype"
+	"github.com/golang/freetype/truetype"
+	"golang.org/x/image/font"
 )
 
 var (
-	arialPath   *string
-	fontContext *freetype.Context
+	FontName string
+	theFont  *truetype.Font
 )
 
-func init() {
-	// try to find Arial so we can measure it
-	// I don't try very hard...
-	popularpaths := []string{
+// we try to have sane defaults wrt font usage
+//
+// 1) auto-load Arial if found as the default font.
+// 2) allow users to set a different font if desired
+//
+
+func LoadDefaultFont() error {
+	// try to find Arial in the most common locations
+	commonPaths := []string{
 		// OS X path
 		"/Library/Fonts/Arial.ttf",
 
@@ -41,28 +48,26 @@ func init() {
 		// Ubuntu with multiverse msttcorefonts package
 		"/usr/share/fonts/truetype/msttcorefonts/arial.ttf",
 	}
-	for _, path := range popularpaths {
-		err := LoadFontPath(path)
+	for _, path := range commonPaths {
+		err := LoadFont("Arial", path)
 		if err == nil {
-			return
+			return nil
 		}
 	}
+	return fmt.Errorf("unable to find Arial.ttf")
 }
 
-func FontLoaded() bool {
-	return fontContext != nil
-}
-
-func LoadFontPath(path string) error {
+func LoadFont(name, path string) error {
 	fontBytes, err := ioutil.ReadFile(path)
-	if err == nil {
-		arialFont, err := freetype.ParseFont(fontBytes)
-		if err == nil {
-			fontContext = freetype.NewContext()
-			fontContext.SetFont(arialFont)
-		}
+	if err != nil {
+		return err
 	}
-	return err
+	theFont, err = truetype.Parse(fontBytes)
+	if err != nil {
+		return err
+	}
+	FontName = name
+	return nil
 }
 
 // MeasureFont returns the pixel width of the string s at font size sz.
@@ -70,10 +75,16 @@ func LoadFontPath(path string) error {
 // conservative ballpark estimate otherwise.
 func MeasureFont(s string, sz int) int {
 	// use actual TTF font metrics if available
-	if fontContext != nil {
-		fontContext.SetFontSize(float64(sz))
-		w, _, _ := fontContext.MeasureString(s)
-		return freetype.Pixel(w)
+	if theFont != nil {
+		myFace := truetype.NewFace(theFont, &truetype.Options{
+			Size: float64(sz),
+			DPI:  float64(DefaultSettings.dpi),
+		})
+		d := &font.Drawer{Face: myFace}
+		w := d.MeasureString(s)
+
+		// convert from 26.6 fixed point to pixels
+		return int(w >> 6)
 	}
 
 	return len(s) * (sz - 2)

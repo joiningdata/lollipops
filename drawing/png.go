@@ -24,10 +24,12 @@ import (
 	"image/draw"
 	"image/png"
 	"io"
+	"log"
 
-	"code.google.com/p/jamslam-freetype-go/freetype"
-
+	"github.com/golang/freetype/truetype"
 	"github.com/pbnjay/lollipops/data"
+	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 )
 
 func DrawPNG(w io.Writer, dpi float64, changelist []string, g *data.PfamGraphicResponse) {
@@ -51,8 +53,6 @@ func (s *Settings) DrawPNG(w io.Writer, dpi float64, changelist []string, g *dat
 		s.AxisHeight *= dpiScale
 		s.TextPadding *= dpiScale
 		s.dpi = dpi
-
-		fontContext.SetDPI(s.dpi)
 	}
 	d := s.prepare(changelist, g)
 	d.png(w)
@@ -66,16 +66,20 @@ func (s *diagram) png(w io.Writer) {
 	img := image.NewRGBA(image.Rect(0, 0, int(s.GraphicWidth), int(s.GraphicHeight)))
 	drawRectWH(img, 0, 0, s.GraphicWidth, s.GraphicHeight, color.White)
 
-	fontContext.SetDst(img)
-	fontContext.SetClip(img.Bounds())
-	fontContext.SetFontSize(10.0)
-
+	blackFontDrawer := &font.Drawer{
+		Dst: img,
+		Src: &image.Uniform{color.Black},
+		Face: truetype.NewFace(theFont, &truetype.Options{
+			Size:    float64(10.0),
+			DPI:     float64(DefaultSettings.dpi),
+			Hinting: font.HintingFull,
+		}),
+	}
 	//////
 
 	startY := s.startY
 	poptop := startY + s.LollipopRadius
 	popbot := poptop + s.LollipopHeight
-	fontContext.SetSrc(&image.Uniform{color.Black})
 
 	firstLollipop := true
 	for _, pop := range s.ticks {
@@ -98,11 +102,12 @@ func (s *diagram) png(w io.Writer) {
 			}
 
 			// FIXME: rotate label to match SVG output
-			w, _, _ := fontContext.MeasureString(chg)
-			fontContext.DrawString(chg, freetype.Pt(
-				int(pop.x-(float64(freetype.Pixel(w))/2.0)),
-				int(pop.y-(pop.r*1.5)),
-			))
+			wf := blackFontDrawer.MeasureString(chg)
+			blackFontDrawer.Dot = fixed.Point26_6{
+				X: fixed.I(int(pop.x)) - wf/2,
+				Y: fixed.I(int(pop.y - (pop.r * 1.5))),
+			}
+			blackFontDrawer.DrawString(chg)
 		}
 	}
 
@@ -139,10 +144,23 @@ func (s *diagram) png(w io.Writer) {
 		}
 	}
 
-	fontContext.SetSrc(&image.Uniform{color.White})
-	fontContext.SetFontSize(12.0)
-	// get font height in px assuming ~2pt descender
-	fontH := float64(freetype.Pixel(fontContext.PointToFix32(10.0)))
+	whiteFontDrawer := &font.Drawer{
+		Dst: img,
+		Src: &image.Uniform{color.White},
+		Face: truetype.NewFace(theFont, &truetype.Options{
+			Size:    float64(12.0),
+			DPI:     float64(DefaultSettings.dpi),
+			Hinting: font.HintingFull,
+		}),
+	}
+
+	// get font height in px
+	bounds, _, ok := whiteFontDrawer.Face.GlyphBounds('M')
+	if !ok {
+		log.Fatalf("unable to determine font bounds!")
+	}
+	// add 2px line spacing
+	fontH := bounds.Max.Sub(bounds.Min).Y + fixed.I(2)
 
 	// draw the curated domains
 	for ri, r := range s.g.Regions {
@@ -156,11 +174,12 @@ func (s *diagram) png(w io.Writer) {
 
 		if swidth > 10 && s.domainLabels[ri] != "" {
 			// center text at x
-			w, _, _ := fontContext.MeasureString(s.domainLabels[ri])
-			fontContext.DrawString(s.domainLabels[ri], freetype.Pt(
-				int(s.Padding+sstart+((swidth-float64(freetype.Pixel(w)))/2.0)),
-				int(startY+s.DomainHeight/2+fontH/2),
-			))
+			wf := whiteFontDrawer.MeasureString(s.domainLabels[ri])
+			whiteFontDrawer.Dot = fixed.Point26_6{
+				X: fixed.I(int(s.Padding+sstart)) + (fixed.I(int(swidth))-wf)/2,
+				Y: fixed.I(int(startY+s.DomainHeight/2)) + fontH/2,
+			}
+			whiteFontDrawer.DrawString(s.domainLabels[ri])
 		}
 	}
 
@@ -168,10 +187,6 @@ func (s *diagram) png(w io.Writer) {
 		startY += s.DomainHeight + s.AxisPadding
 		thickhline(img, int(s.Padding), int(s.GraphicWidth-s.Padding+s.dpi/36.0), int(startY), s.dpi/72.0, color.Gray{0xAA})
 		thickvline(img, int(s.Padding), int(startY), int(startY+(s.AxisHeight/3)), s.dpi/72.0, color.Gray{0xAA})
-
-		// set black 10px font
-		fontContext.SetFontSize(10.0)
-		fontContext.SetSrc(&image.Uniform{color.Black})
 
 		lastDrawn := 0
 		for i, t := range s.ticks {
@@ -188,8 +203,13 @@ func (s *diagram) png(w io.Writer) {
 
 			// center text at x
 			spos := fmt.Sprint(t.Pos)
-			w, _, _ := fontContext.MeasureString(spos)
-			fontContext.DrawString(spos, freetype.Pt(int(x-float64(freetype.Pixel(w))/2.0), int(startY+s.AxisHeight)))
+
+			wf := blackFontDrawer.MeasureString(spos)
+			blackFontDrawer.Dot = fixed.Point26_6{
+				X: fixed.I(int(x)) - wf/2,
+				Y: fixed.I(int(startY + s.AxisHeight)),
+			}
+			blackFontDrawer.DrawString(spos)
 		}
 	}
 
