@@ -57,6 +57,10 @@ func (s *diagram) svg(w io.Writer) {
 	aaLen, _ := s.g.Length.Int64()
 	scale := (s.GraphicWidth - s.Padding*2) / float64(aaLen)
 	aaSpace := int(20 / scale)
+	fontSpec := ""
+	if FontName != "" {
+		fontSpec = "font-family:" + FontName + ";"
+	}
 
 	fmt.Fprintf(w, svgHeader, s.GraphicWidth, s.GraphicHeight)
 
@@ -87,8 +91,8 @@ func (s *diagram) svg(w io.Writer) {
 			if pop.Cnt > 1 {
 				chg = fmt.Sprintf("%s (%d)", chg, pop.Cnt)
 			}
-			fmt.Fprintf(w, `<text style="font-size:10px;font-family:sans-serif;fill:#555;" text-anchor="middle" x="0" y="%f">%s</text></g>`,
-				(pop.r * -1.5), chg)
+			fmt.Fprintf(w, `<text style="font-size:10px;%sfill:#555;" text-anchor="middle" x="0" y="%f">%s</text></g>`,
+				fontSpec, (pop.r * -1.5), chg)
 		}
 	}
 
@@ -140,8 +144,8 @@ func (s *diagram) svg(w io.Writer) {
 		fmt.Fprintf(w, `<g transform="translate(%f,%f)"><a xlink:href="%s" xlink:title="%s">`, s.Padding+sstart, startY, "http://pfam.xfam.org"+r.Link, r.Metadata.Description)
 		fmt.Fprintf(w, `<rect fill="%s" x="0" y="0" width="%f" height="%f" filter="url(#ds)"/>`, r.Color, swidth, s.DomainHeight)
 		if swidth > 10 && s.domainLabels[ri] != "" {
-			fmt.Fprintf(w, `<text style="font-size:12px;font-family:sans-serif;fill:#ffffff;" text-anchor="middle" x="%f" y="%f">%s</text>`,
-				swidth/2.0, 4+s.DomainHeight/2, s.domainLabels[ri])
+			fmt.Fprintf(w, `<text style="font-size:12px;%sfill:#ffffff;" text-anchor="middle" x="%f" y="%f">%s</text>`,
+				fontSpec, swidth/2.0, 4+s.DomainHeight/2, s.domainLabels[ri])
 		}
 		fmt.Fprintln(w, `</a></g>`)
 	}
@@ -164,7 +168,8 @@ func (s *diagram) svg(w io.Writer) {
 			lastDrawn = t.Pos
 			x := s.Padding + (float64(t.Pos) * scale)
 			fmt.Fprintf(w, `<line x1="%f" x2="%f" y1="%f" y2="%f" stroke="#AAAAAA" />`, x, x, startY, startY+(s.AxisHeight/3))
-			fmt.Fprintf(w, `<text style="font-size:10px;font-family:sans-serif;fill:#000000;" text-anchor="middle" x="%f" y="%f">%d</text>`, x, startY+s.AxisHeight, t.Pos)
+			fmt.Fprintf(w, `<text style="font-size:10px;%sfill:#000000;" text-anchor="middle" x="%f" y="%f">%d</text>`,
+				fontSpec, x, startY+s.AxisHeight, t.Pos)
 		}
 
 		fmt.Fprintln(w, "</g>")
