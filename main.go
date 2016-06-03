@@ -27,6 +27,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/inconshreveable/mousetrap"
 	"github.com/pbnjay/lollipops/data"
 	"github.com/pbnjay/lollipops/drawing"
 )
@@ -150,6 +151,16 @@ Output options:
 
 	if flag.NArg() == 0 && *uniprot == "" {
 		flag.Usage()
+
+		if mousetrap.StartedByExplorer() {
+			fmt.Fprintln(os.Stderr, `!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+This is a command-line utility for pipeline processing, you probably don't want
+to double-click it! Open your command prompt with 'cmd.exe' and try again.
+
+Press Enter/Ctrl-C to quit.`)
+			fmt.Scanln(&acc)
+		}
 		os.Exit(1)
 	}
 
