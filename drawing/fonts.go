@@ -42,8 +42,9 @@ func LoadDefaultFont() error {
 		// OS X path
 		"/Library/Fonts/Arial.ttf",
 
-		// Windows path
-		"C:/Windows/Fonts/arial.ttf",
+		// Windows paths
+		"C:\\WINDOWS\\Fonts\\arial.ttf",
+		"C:\\WINNT\\Fonts\\arial.ttf",
 
 		// Ubuntu with multiverse msttcorefonts package
 		"/usr/share/fonts/truetype/msttcorefonts/arial.ttf",

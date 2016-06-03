@@ -114,7 +114,8 @@ Output options:
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "ERROR: Unable to find Arial.ttf - Which is required for accurate font sizing.")
 			fmt.Fprintln(os.Stderr, "       Please use -f=/path/to/arial.ttf or the TrueType (.ttf) font of your choice.")
-			os.Exit(1)
+			// continue in the hopes that SVG rendering will be ok...
+			//os.Exit(1)
 		}
 	} else {
 		fname := path.Base(*fontPath)
