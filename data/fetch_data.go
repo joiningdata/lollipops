@@ -124,3 +124,46 @@ func GetProtID(symbol string) (string, error) {
 	}
 	return protID, nil
 }
+
+func GetProtMapping(dbname, geneid string) (string, error) {
+	apiURL := `http://www.uniprot.org/mapping/`
+	params := url.Values{
+		"from":   {dbname},
+		"query":  {geneid}, // wish i could filter only reviewed:yes here...
+		"to":     {"ACC"},
+		"format": {"tab"},
+	}
+
+	resp, err := http.PostForm(apiURL, params)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("uniprot error: %s", resp.Status)
+	}
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var res []string
+	protID := ""
+	for i, line := range strings.Split(string(respBytes), "\n") {
+		if i == 0 { //skip header
+			continue
+		}
+		p := strings.SplitN(line, "\t", 2)
+		if len(p) == 2 {
+			res = append(res, p[1])
+			// take the shortest acc in the hopes it's reviewed
+			if protID == "" || len(p[1]) < len(protID) {
+				protID = p[1]
+			}
+		}
+	}
+	if len(res) > 1 {
+		fmt.Println("More than one Uniprot result: ", strings.Join(res, ", "))
+	}
+	return protID, nil
+}

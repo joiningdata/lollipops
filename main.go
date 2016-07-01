@@ -33,6 +33,7 @@ import (
 )
 
 var (
+	queryDB = flag.String("Q", "GENENAME", "Uniprot query database when -U not used")
 	uniprot = flag.String("U", "", "Uniprot accession instead of GENE_SYMBOL")
 	output  = flag.String("o", "", "output SVG/PNG file (default GENE_SYMBOL.svg)")
 	width   = flag.Int("w", 0, "output width (default automatic fit labels)")
@@ -53,11 +54,21 @@ var (
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [options] {-U UNIPROT_ID | GENE_SYMBOL} [PROTEIN CHANGES ...]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] {-Q UNIPROT_DB IDENTIFER | -U UNIPROT_ID | GENE_SYMBOL} [PROTEIN CHANGES ...]\n", os.Args[0])
 		fmt.Fprintln(os.Stderr, `
-Where GENE_SYMBOL is the official human HGNC gene symbol. This will use the
-BioMart API to lookup the UNIPROT_ID. To skip the lookup or use other species,
-specify the UniProt ID with -U (e.g. "-U P04637" for TP53)
+Protein ID input:
+  GENE_SYMBOL is the official human HGNC gene symbol. This will use the
+  UniprotKB API to lookup the UNIPROT_ID.
+
+  You can provide a UniProt ID directly with -U (e.g. "-U P04637" for TP53)
+
+  For more advanced usage, query UniprotKB's database mappings directly using
+  a supported identifier with -Q DBNAME. Available DBNAMEs can be found here:
+     http://www.uniprot.org/help/programmatic_access#id_mapping_examples
+
+     RefSeq ID        e.g. -Q P_REFSEQ_AC NP_001265252.1
+     Entrez GeneID    e.g. -Q P_ENTREZGENEID 4336
+     Ensembl ID       e.g. -Q ENSEMBL_ID ENSG00000168314
 
 Protein changes:
   Currently only point mutations are supported, and may be specified as:
@@ -135,9 +146,14 @@ Output options:
 		geneSymbol = flag.Arg(0)
 		varStart = 1
 
-		fmt.Fprintln(os.Stderr, "HGNC Symbol: ", flag.Arg(0))
+		if *queryDB == "GENENAME" {
+			fmt.Fprintln(os.Stderr, "HGNC Symbol: ", flag.Arg(0))
+			acc, err = data.GetProtID(flag.Arg(0))
+		} else {
+			fmt.Fprintln(os.Stderr, "Searching for ID: ", flag.Arg(0))
+			acc, err = data.GetProtMapping(*queryDB, flag.Arg(0))
+		}
 
-		acc, err = data.GetProtID(flag.Arg(0))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
