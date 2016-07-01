@@ -40,8 +40,8 @@ var (
 	dpi     = flag.Float64("dpi", 72, "output DPI for PNG rasterization")
 
 	showLabels     = flag.Bool("labels", false, "draw mutation labels above lollipops")
-	hideDisordered = flag.Bool("hide-disordered", false, "do not draw disordered regions")
-	hideMotifs     = flag.Bool("hide-motifs", false, "do not draw motifs")
+	showDisordered = flag.Bool("show-disordered", false, "draw disordered regions on the backbone")
+	showMotifs     = flag.Bool("show-motifs", false, "draw simple motif regions")
 	hideAxis       = flag.Bool("hide-axis", false, "do not draw the aa position axis")
 	noPatterns     = flag.Bool("no-patterns", false, "use solid fill instead of patterns for SVG output")
 	domainLabels   = flag.String("domain-labels", "truncated", "how to apply domain labels")
@@ -94,8 +94,8 @@ Diagram generation options:
   -syn-color="#0000ff"    color to use for synonymous mutation markers
   -mut-color="#ff0000"    color to use for non-synonymous mutation markers
   -hide-axis              do not draw the amino position x-axis
-  -hide-disordered        do not draw disordered regions on the backbone
-  -hide-motifs            do not draw simple motif regions
+  -show-disordered        draw disordered regions on the backbone
+  -show-motifs            draw simple motif regions
   -labels                 draw label text above lollipop markers
   -no-patterns            use solid fill instead of patterns (SVG only)
   -domain-labels=fit      hot to apply domain labels (default="truncated")
@@ -111,8 +111,8 @@ Output options:
 
 	flag.Parse()
 	drawing.DefaultSettings.ShowLabels = *showLabels
-	drawing.DefaultSettings.HideDisordered = *hideDisordered
-	drawing.DefaultSettings.HideMotifs = *hideMotifs
+	drawing.DefaultSettings.HideDisordered = !*showDisordered
+	drawing.DefaultSettings.HideMotifs = !*showMotifs
 	drawing.DefaultSettings.HideAxis = *hideAxis
 	drawing.DefaultSettings.SolidFillOnly = *noPatterns
 	drawing.DefaultSettings.DomainLabelStyle = *domainLabels
