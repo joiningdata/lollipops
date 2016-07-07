@@ -59,11 +59,12 @@ the area is exponentially proportional to the count indicated. Examples:
 ####Diagram generation options
 
 ```
+  -legend                 draw a legend for colored regions
   -syn-color="#0000ff"    color to use for synonymous mutation markers
   -mut-color="#ff0000"    color to use for non-synonymous mutation markers
   -hide-axis              do not draw the amino position x-axis
-  -hide-disordered        do not draw disordered regions on the backbone
-  -hide-motifs            do not draw simple motif regions
+  -show-disordered        draw disordered regions on the backbone
+  -show-motifs            draw simple motif regions
   -labels                 draw label text above lollipop markers
   -no-patterns            use solid fill instead of patterns (SVG only)
 ```

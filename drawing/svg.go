@@ -173,6 +173,17 @@ func (s *diagram) svg(w io.Writer) {
 		}
 
 		fmt.Fprintln(w, "</g>")
+		startY += s.AxisHeight
+	}
+
+	for key, color := range s.legendInfo {
+		startY += 14.0
+		if key == data.PfamMotifNames["disorder"] {
+			color = disFill
+		}
+		fmt.Fprintf(w, `<rect fill="%s" x="4" y="%f" width="12" height="12" filter="url(#ds)"/>`, color, startY)
+		fmt.Fprintf(w, `<text style="font-size:12px;%sfill:#000000;" text-anchor="start" x="20" y="%f">%s</text>`,
+			fontSpec, startY+12, key) // 12=font height-baseline
 	}
 
 	fmt.Fprintln(w, svgFooter)

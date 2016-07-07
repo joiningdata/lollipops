@@ -19,6 +19,8 @@ package drawing
 
 // Settings contains all the configurable options for lollipop diagram generation.
 type Settings struct {
+	// ShowLegend adds a color-coding legend above the diagram.
+	ShowLegend bool
 	// ShowLabels adds mutation label text above lollipops markers.
 	ShowLabels bool
 	// HideDisordered hides disordered regions on the backbone even if motifs are shown.
@@ -68,11 +70,14 @@ type Settings struct {
 	GraphicHeight float64
 
 	dpi float64
+
+	legendInfo map[string]string
 }
 
 // DefaultSettings contains the "standard" diagram output config and is used by
 // the package-level Draw invocations.
 var DefaultSettings = Settings{
+	ShowLegend:     false,
 	ShowLabels:     false,
 	HideDisordered: false,
 	HideMotifs:     false,

@@ -30,6 +30,15 @@ import (
 
 const PfamGraphicURL = "http://pfam.xfam.org/protein/%s/graphic"
 
+// PfamMotifNames has human-readable names from http://pfam.xfam.org/help#tabview=tab9
+var PfamMotifNames = map[string]string{
+	"disorder":       "Disordered region (Pfam/IUPred)",
+	"low_complexity": "Low complexity region (Pfam/SEG)",
+	"sig_p":          "Signal peptide region (Pfam/Phobius)",
+	"coiled_coil":    "Coiled-coil motif (Pfam/ncoils)",
+	"transmembrane":  "Transmembrane region (Pfam/Phobius)",
+}
+
 // PfamGraphicFeature is a generic representation of various Pfam feature responses
 type PfamGraphicFeature struct {
 	Color         string              `json:"colour"`

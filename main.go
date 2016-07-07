@@ -39,6 +39,7 @@ var (
 	width   = flag.Int("w", 0, "output width (default automatic fit labels)")
 	dpi     = flag.Float64("dpi", 72, "output DPI for PNG rasterization")
 
+	showLegend     = flag.Bool("legend", false, "draw a legend for colored regions")
 	showLabels     = flag.Bool("labels", false, "draw mutation labels above lollipops")
 	showDisordered = flag.Bool("show-disordered", false, "draw disordered regions on the backbone")
 	showMotifs     = flag.Bool("show-motifs", false, "draw simple motif regions")
@@ -91,6 +92,7 @@ Protein changes:
   (N.B. color must come before count in tags)
 
 Diagram generation options:
+  -legend                 draw a legend for colored regions
   -syn-color="#0000ff"    color to use for synonymous mutation markers
   -mut-color="#ff0000"    color to use for non-synonymous mutation markers
   -hide-axis              do not draw the amino position x-axis
@@ -110,6 +112,7 @@ Output options:
 	}
 
 	flag.Parse()
+	drawing.DefaultSettings.ShowLegend = *showLegend
 	drawing.DefaultSettings.ShowLabels = *showLabels
 	drawing.DefaultSettings.HideDisordered = !*showDisordered
 	drawing.DefaultSettings.HideMotifs = !*showMotifs
@@ -208,5 +211,4 @@ Press Enter/Ctrl-C to quit.`)
 	} else {
 		drawing.DrawSVG(f, flag.Args()[varStart:], data)
 	}
-
 }

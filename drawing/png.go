@@ -211,6 +211,23 @@ func (s *diagram) png(w io.Writer) {
 			}
 			blackFontDrawer.DrawString(spos)
 		}
+		startY += s.AxisHeight
+	}
+
+	for key, colorstring := range s.legendInfo {
+		startY += 14.0
+		// 15% darker than backbone (i.e. disordered color)
+		clr := color.RGBA{0x9E, 0xA0, 0x9A, 0xFF}
+		if key != data.PfamMotifNames["disorder"] {
+			clr = colorFromHex(BlendColorStrings(colorstring, "#FFFFFF"))
+		}
+		drawRectWHShadow(img, 4, startY, 12, 12, clr, 2*s.dpi/72.0)
+
+		blackFontDrawer.Dot = fixed.Point26_6{
+			X: fixed.I(20),
+			Y: fixed.I(int(startY + 12)), // 12=font height-baseline
+		}
+		blackFontDrawer.DrawString(key)
 	}
 
 	png.Encode(w, img)
