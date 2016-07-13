@@ -167,7 +167,9 @@ func (s *Settings) prepare(changelist []string, g *data.PfamGraphicResponse) *di
 				d.ticks = append(d.ticks, Tick{Pos: int(tstart), Pri: 1})
 				d.ticks = append(d.ticks, Tick{Pos: int(tend), Pri: 1})
 			}
-			s.legendInfo[r.Type] = BlendColorStrings(r.Color, "#FFFFFF")
+			if s.legendInfo != nil {
+				s.legendInfo[r.Type] = BlendColorStrings(r.Color, "#FFFFFF")
+			}
 		}
 	}
 
@@ -232,7 +234,7 @@ func (s *Settings) prepare(changelist []string, g *data.PfamGraphicResponse) *di
 			}
 		}
 
-		if label != r.Metadata.Description {
+		if s.legendInfo != nil && label != r.Metadata.Description {
 			s.legendInfo[r.Metadata.Description] = r.Color
 		}
 		d.domainLabels = append(d.domainLabels, label)
