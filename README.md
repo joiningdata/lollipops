@@ -1,6 +1,7 @@
 #lollipops
 
-[![DOI](https://zenodo.org/badge/20224/pbnjay/lollipops.svg)](https://zenodo.org/badge/latestdoi/20224/pbnjay/lollipops)
+**New publication out! Please cite this work as:**
+* Jay JJ, Brouwer C (2016) Lollipops in the Clinic: Information Dense Mutation Plots for Precision Medicine. PLoS ONE 11(8): e0160519. doi: [10.1371/journal.pone.0160519](http://dx.doi.org/10.1371/journal.pone.0160519).
 
 A simple 'lollipop' mutation diagram generator that tries to make things
 simple and easy by automating as much as possible. It uses the
