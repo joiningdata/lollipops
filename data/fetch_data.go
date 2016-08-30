@@ -116,7 +116,13 @@ func GetProtID(symbol string) (string, error) {
 	for _, line := range strings.Split(string(respBytes), "\n") {
 		n := strings.Count(line, symbol)
 		if n >= bestHit {
-			p := strings.SplitN(line, "\t", 2)
+			p := strings.SplitN(line, "\t", 4)
+			for _, g := range strings.Split(p[3], " ") {
+				if g == symbol {
+					// exact match, return immediately
+					return p[0], nil
+				}
+			}
 			bestHit = n
 			protID = p[0]
 		}
