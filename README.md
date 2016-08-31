@@ -78,6 +78,12 @@ the area is exponentially proportional to the count indicated. Examples:
   -dpi=300                set DPI (PNG output only)
 ```
 
+####Local file input:
+
+```
+  -l=filename.json        use local file instead of Pfam API for graphic data
+                            see: http://pfam.xfam.org/help#tabview=tab9
+```
 
 ##Installation
 

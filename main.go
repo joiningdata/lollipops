@@ -51,6 +51,8 @@ var (
 	mutColor = flag.String("mut-color", "#ff0000", "color to use for non-synonymous lollipops")
 
 	fontPath = flag.String("f", "", "Path to truetype font to use for drawing (defaults to Arial.ttf)")
+
+	localPath = flag.String("l", "", "Path to local json graphic data (Pfam response format)")
 )
 
 func main() {
@@ -108,6 +110,10 @@ Output options:
   -o=filename.png         set output filename (.png or .svg supported)
   -w=700                  set diagram pixel width (default = automatic fit)
   -dpi=300                set DPI (PNG output only)
+
+Local file input:
+  -l=filename.json        use local file instead of Pfam API for graphic data
+                            see: http://pfam.xfam.org/help#tabview=tab9
 `)
 	}
 
@@ -184,7 +190,12 @@ Press Enter/Ctrl-C to quit.`)
 		os.Exit(1)
 	}
 
-	d, err := data.GetPfamGraphicData(acc)
+	var d *data.PfamGraphicResponse
+	if *localPath != "" {
+		d, err = data.GetLocalPfamGraphicData(*localPath)
+	} else {
+		d, err = data.GetPfamGraphicData(acc)
+	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

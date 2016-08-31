@@ -68,6 +68,17 @@ type PfamGraphicResponse struct {
 	Regions  []PfamGraphicFeature `json:"regions"`
 }
 
+func GetLocalPfamGraphicData(filename string) (*PfamGraphicResponse, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	pf := &PfamGraphicResponse{}
+	err = json.NewDecoder(f).Decode(pf)
+	f.Close()
+	return pf, err
+}
+
 func GetPfamGraphicData(accession string) (*PfamGraphicResponse, error) {
 	queryURL := fmt.Sprintf(PfamGraphicURL, accession)
 	resp, err := http.Get(queryURL)
