@@ -20,11 +20,11 @@ mutations (ex: ``R273C R175H T125 R248Q``)
 
 ![TP53 Lollipop diagram with 4 marked mutations](tp53.png?raw=true)
 
-More advanced usage allows for per-mutation color (e.x. sample type) and
-size specification (i.e. denoting number of samples), along with text
-labels and more:
+More advanced usage allows for per-mutation color (e.g. sample type) and
+size specification (e.g. denoting number of samples), along with text
+labels, a legend for abbreviated domains, and more:
 
-		./lollipops -labels TP53 R248Q#7f3333@131 R273C R175H T125@5
+		./lollipops -legend -labels TP53 R248Q#7f3333@131 R273C R175H T125@5
 
 ![TP53 Lollipop diagram with 5 customized mutations](tp53_more.png?raw=true)
 
