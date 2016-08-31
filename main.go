@@ -184,13 +184,13 @@ Press Enter/Ctrl-C to quit.`)
 		os.Exit(1)
 	}
 
-	data, err := data.GetPfamGraphicData(acc)
+	d, err := data.GetPfamGraphicData(acc)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	if geneSymbol == "" {
-		geneSymbol = data.Metadata.Identifier
+		geneSymbol = d.Metadata.Identifier
 		fmt.Fprintln(os.Stderr, "Pfam Symbol: ", geneSymbol)
 	}
 
@@ -207,8 +207,8 @@ Press Enter/Ctrl-C to quit.`)
 
 	fmt.Fprintln(os.Stderr, "Drawing diagram to", *output)
 	if strings.HasSuffix(strings.ToLower(*output), ".png") {
-		drawing.DrawPNG(f, *dpi, flag.Args()[varStart:], data)
+		drawing.DrawPNG(f, *dpi, flag.Args()[varStart:], d)
 	} else {
-		drawing.DrawSVG(f, flag.Args()[varStart:], data)
+		drawing.DrawSVG(f, flag.Args()[varStart:], d)
 	}
 }
