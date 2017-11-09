@@ -1,6 +1,6 @@
-#lollipops
+# lollipops
 
-**New publication out! Please cite this work as:**
+**Please cite this work as**
 * Jay JJ, Brouwer C (2016) Lollipops in the Clinic: Information Dense Mutation Plots for Precision Medicine. PLoS ONE 11(8): e0160519. doi: [10.1371/journal.pone.0160519](http://dx.doi.org/10.1371/journal.pone.0160519).
 
 A simple 'lollipop' mutation diagram generator that tries to make things
@@ -11,7 +11,7 @@ translate HGNC Gene Symbols into Uniprot/SwissProt Accession number. If
 variant changes are provided, it will also annotate them to the diagram
 using the "lollipops" markers that give the tool it's name.
 
-##Example
+## Example
 
 Basic usage is just the gene symbol (ex: ``TP53``) and a list of
 mutations (ex: ``R273C R175H T125 R248Q``)
@@ -28,7 +28,7 @@ labels, a legend for abbreviated domains, and more:
 
 ![TP53 Lollipop diagram with 5 customized mutations](tp53_more.png?raw=true)
 
-##Usage
+## Usage
 
 Usage: ``lollipops [options] {-U UNIPROT_ID | GENE_SYMBOL} [PROTEIN CHANGES ...]``
 
@@ -36,7 +36,7 @@ Where **GENE_SYMBOL** is the official human HGNC gene symbol. This will use the
 official API to lookup the **UNIPROT_ID**. To skip the lookup or use other species,
 specify the UniProt ID with -U (e.g. ``-U P04637`` for TP53)
 
-####Protein changes
+#### Protein changes
 
 Currently only point mutations are supported, and may be specified as:
 
@@ -57,7 +57,7 @@ the area is exponentially proportional to the count indicated. Examples:
 
 **N.B.** Color must come before count in tags.
 
-####Diagram generation options
+#### Diagram generation options
 
 ```
   -legend                 draw a legend for colored regions
@@ -70,7 +70,7 @@ the area is exponentially proportional to the count indicated. Examples:
   -no-patterns            use solid fill instead of patterns (SVG only)
 ```
 
-####Output options
+#### Output options
 
 ```
   -o=filename.png         set output filename (.png or .svg supported)
@@ -78,14 +78,14 @@ the area is exponentially proportional to the count indicated. Examples:
   -dpi=300                set DPI (PNG output only)
 ```
 
-####Local file input:
+#### Local file input:
 
 ```
   -l=filename.json        use local file instead of Pfam API for graphic data
                             see: http://pfam.xfam.org/help#tabview=tab9
 ```
 
-##Installation
+## Installation
 
 Head over to the [Releases](https://github.com/pbnjay/lollipops/releases) to
 download the latest version for your system in a simple command-line executable.
@@ -93,7 +93,7 @@ download the latest version for your system in a simple command-line executable.
 If you already have Go installed and want the bleeding edge, just
 ``go get -u github.com/pbnjay/lollipops`` to download the latest version.
 
-##Embedding
+## Embedding
 
 As of v0.97, lollipops is now easy to embed in other Go applications. The following code prints an SVG for TP53 and some mutations to standard output:
 
@@ -129,10 +129,6 @@ previously discussed. Pull Requests are welcome, but please create an issue befo
 to discuss significant changes.
 
 Code contributions are expected to be properly formatted with `go fmt`, and generally adhere to the standard [Golang review guidelines](https://github.com/golang/go/wiki/CodeReviewComments).
-
-Many thanks to all our other contributors:
- - [Jim Havrilla](https://github.com/jimhavrilla) - Initial lollipop color labeling code [PR #3](https://github.com/pbnjay/lollipops/pull/3)
- - Everyone who has submitted bug reports, feature requests, and shared the project with colleages!
 
 # LICENSE
 
