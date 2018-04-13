@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -83,6 +83,10 @@ func GetPfamGraphicData(accession string) (*PfamGraphicResponse, error) {
 	queryURL := fmt.Sprintf(PfamGraphicURL, accession)
 	resp, err := http.Get(queryURL)
 	if err != nil {
+		if err, ok := err.(net.Error); ok && err.Timeout() {
+			fmt.Fprintf(os.Stderr, "Unable to connect to Pfam. Check your internet connection or try again later.")
+			os.Exit(1)
+		}
 		return nil, err
 	}
 	respBytes, err := ioutil.ReadAll(resp.Body)
@@ -112,6 +116,10 @@ func GetProtID(symbol string) (string, error) {
 
 	resp, err := http.Get(apiURL)
 	if err != nil {
+		if err, ok := err.(net.Error); ok && err.Timeout() {
+			fmt.Fprintf(os.Stderr, "Unable to connect to Uniprot. Check your internet connection or try again later.")
+			os.Exit(1)
+		}
 		return "", err
 	}
 	respBytes, err := ioutil.ReadAll(resp.Body)
@@ -128,6 +136,9 @@ func GetProtID(symbol string) (string, error) {
 		n := strings.Count(line, symbol)
 		if n >= bestHit {
 			p := strings.SplitN(line, "\t", 4)
+			if len(p) < 4 {
+				continue
+			}
 			for _, g := range strings.Split(p[3], " ") {
 				if g == symbol {
 					// exact match, return immediately
@@ -139,12 +150,13 @@ func GetProtID(symbol string) (string, error) {
 		}
 		nmatches++
 	}
+	fmt.Fprintf(os.Stderr, "Uniprot returned %d hits for your gene symbol '%s':\n", nmatches, symbol)
 	if nmatches > 1 {
-		fmt.Fprintf(os.Stderr, "Uniprot returned %d hits for your gene symbol '%s':\n", nmatches, symbol)
 		fmt.Fprintln(os.Stderr, string(respBytes))
 	}
 	if bestHit == 0 {
-		log.Fatalf("Unable to find protein ID for '%s'", symbol)
+		fmt.Fprintf(os.Stderr, "Unable to find protein ID for '%s' (use -U XX to select one of the above)\n", symbol)
+		os.Exit(1)
 	} else if nmatches > 1 {
 		fmt.Fprintf(os.Stderr, "Selected '%s' as the best match. Use -U XXX to use another ID.\n\n", protID)
 	}
@@ -162,6 +174,10 @@ func GetProtMapping(dbname, geneid string) (string, error) {
 
 	resp, err := http.PostForm(apiURL, params)
 	if err != nil {
+		if err, ok := err.(net.Error); ok && err.Timeout() {
+			fmt.Fprintf(os.Stderr, "Unable to connect to Uniprot. Check your internet connection or try again later.")
+			os.Exit(1)
+		}
 		return "", err
 	}
 	defer resp.Body.Close()
