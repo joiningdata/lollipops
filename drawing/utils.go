@@ -76,7 +76,7 @@ func BlendColorStrings(a, b string) string {
 
 // AutoWidth automatically determines the best width to use to fit all
 // available domain names into the plot.
-func (s *Settings) AutoWidth(g *data.PfamGraphicResponse) float64 {
+func (s *Settings) AutoWidth(g *data.GraphicResponse) float64 {
 	aaLen, _ := g.Length.Float64()
 	w := 400.0
 	if s.dpi != 0 {

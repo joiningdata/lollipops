@@ -40,15 +40,15 @@ const svgHeader = `<?xml version='1.0'?>
 `
 const svgFooter = `</svg>`
 
-func DrawSVG(w io.Writer, changelist []string, g *data.PfamGraphicResponse) {
+func DrawSVG(w io.Writer, changelist []string, g *data.GraphicResponse) {
 	d := DefaultSettings.prepare(changelist, g)
 	d.svg(w)
 }
 
 // DrawSVG writes the SVG XML document to w, with the provided changes in changelist
-// and Pfam domain/region information in g. If GraphicWidth=0, the AutoWidth is called
+// and domain/region information in g. If GraphicWidth=0, the AutoWidth is called
 // to determine the best diagram width to fit all labels.
-func (s *Settings) DrawSVG(w io.Writer, changelist []string, g *data.PfamGraphicResponse) {
+func (s *Settings) DrawSVG(w io.Writer, changelist []string, g *data.GraphicResponse) {
 	d := s.prepare(changelist, g)
 	d.svg(w)
 }
@@ -178,7 +178,7 @@ func (s *diagram) svg(w io.Writer) {
 
 	for key, color := range s.legendInfo {
 		startY += 14.0
-		if key == data.PfamMotifNames["disorder"] {
+		if key == data.MotifNames["disorder"] {
 			color = disFill
 		}
 		fmt.Fprintf(w, `<rect fill="%s" x="4" y="%f" width="12" height="12" filter="url(#ds)"/>`, color, startY)

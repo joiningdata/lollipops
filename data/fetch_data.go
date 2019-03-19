@@ -30,45 +30,45 @@ import (
 
 const PfamGraphicURL = "http://pfam.xfam.org/protein/%s/graphic"
 
-// PfamMotifNames has human-readable names from http://pfam.xfam.org/help#tabview=tab9
-var PfamMotifNames = map[string]string{
-	"disorder":       "Disordered region (Pfam/IUPred)",
-	"low_complexity": "Low complexity region (Pfam/SEG)",
-	"sig_p":          "Signal peptide region (Pfam/Phobius)",
-	"coiled_coil":    "Coiled-coil motif (Pfam/ncoils)",
-	"transmembrane":  "Transmembrane region (Pfam/Phobius)",
+// MotifNames has human-readable names
+//  - mostly from http://pfam.xfam.org/help#tabview=tab9
+var MotifNames = map[string]string{
+	"disorder":       "Disordered region",
+	"low_complexity": "Low complexity region",
+	"sig_p":          "Signal peptide region",
+	"coiled_coil":    "Coiled-coil motif",
+	"transmembrane":  "Transmembrane region",
 }
 
-// PfamGraphicFeature is a generic representation of various Pfam feature responses
-type PfamGraphicFeature struct {
-	Color    string              `json:"colour"`
-	Text     string              `json:"text"`
-	Type     string              `json:"type"`
-	Start    json.Number         `json:"start"`
-	End      json.Number         `json:"end"`
-	Link     string              `json:"href"`
-	Metadata PfamGraphicMetadata `json:"metadata"`
-	// many unused fields...
+// GraphicFeature is a generic representation of various feature responses
+type GraphicFeature struct {
+	Color    string          `json:"colour"`
+	Text     string          `json:"text"`
+	Type     string          `json:"type"`
+	Start    json.Number     `json:"start"`
+	End      json.Number     `json:"end"`
+	Link     string          `json:"href"`
+	Metadata GraphicMetadata `json:"metadata"`
 }
 
-type PfamGraphicMetadata struct {
+type GraphicMetadata struct {
 	Description string `json:"description"`
 	Identifier  string `json:"identifier"`
 }
 
-type PfamGraphicResponse struct {
-	Length   json.Number          `json:"length"`
-	Metadata PfamGraphicMetadata  `json:"metadata"`
-	Motifs   []PfamGraphicFeature `json:"motifs"`
-	Regions  []PfamGraphicFeature `json:"regions"`
+type GraphicResponse struct {
+	Length   json.Number      `json:"length"`
+	Metadata GraphicMetadata  `json:"metadata"`
+	Motifs   []GraphicFeature `json:"motifs"`
+	Regions  []GraphicFeature `json:"regions"`
 }
 
-func GetLocalPfamGraphicData(filename string) (*PfamGraphicResponse, error) {
+func GetLocalGraphicData(filename string) (*GraphicResponse, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	pf := &PfamGraphicResponse{}
+	pf := &GraphicResponse{}
 	err = json.NewDecoder(f).Decode(pf)
 	f.Close()
 	for i, x := range pf.Motifs {
@@ -86,7 +86,7 @@ func GetLocalPfamGraphicData(filename string) (*PfamGraphicResponse, error) {
 	return pf, err
 }
 
-func GetPfamGraphicData(accession string) (*PfamGraphicResponse, error) {
+func GetPfamGraphicData(accession string) (*GraphicResponse, error) {
 	queryURL := fmt.Sprintf(PfamGraphicURL, accession)
 	resp, err := http.Get(queryURL)
 	if err != nil {
@@ -104,7 +104,7 @@ func GetPfamGraphicData(accession string) (*PfamGraphicResponse, error) {
 		return nil, fmt.Errorf("pfam error: %s", resp.Status)
 	}
 
-	data := []PfamGraphicResponse{}
+	data := []GraphicResponse{}
 	err = json.Unmarshal(respBytes, &data)
 	//if err != nil {
 	//	return nil, err

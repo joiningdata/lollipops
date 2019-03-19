@@ -193,9 +193,9 @@ Press Enter/Ctrl-C to quit.`)
 		os.Exit(1)
 	}
 
-	var d *data.PfamGraphicResponse
+	var d *data.GraphicResponse
 	if *localPath != "" {
-		d, err = data.GetLocalPfamGraphicData(*localPath)
+		d, err = data.GetLocalGraphicData(*localPath)
 	} else if *alternateData {
 		d, err = data.GetUniprotGraphicData(acc)
 	} else {

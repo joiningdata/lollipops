@@ -29,7 +29,7 @@ import (
 type diagram struct {
 	*Settings
 
-	g          *data.PfamGraphicResponse
+	g          *data.GraphicResponse
 	changelist []string
 
 	ticks        TickSlice
@@ -37,7 +37,7 @@ type diagram struct {
 	startY       float64
 }
 
-func (s *Settings) prepare(changelist []string, g *data.PfamGraphicResponse) *diagram {
+func (s *Settings) prepare(changelist []string, g *data.GraphicResponse) *diagram {
 	d := &diagram{
 		Settings:   s,
 		g:          g,
@@ -243,7 +243,7 @@ func (s *Settings) prepare(changelist []string, g *data.PfamGraphicResponse) *di
 	if s.legendInfo != nil {
 		s.GraphicHeight += float64(1+len(s.legendInfo)) * 14.0
 		for key, color := range s.legendInfo {
-			if rename, found := data.PfamMotifNames[key]; found {
+			if rename, found := data.MotifNames[key]; found {
 				delete(s.legendInfo, key)
 				s.legendInfo[rename] = color
 			}

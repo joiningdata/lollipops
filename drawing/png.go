@@ -32,15 +32,15 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-func DrawPNG(w io.Writer, dpi float64, changelist []string, g *data.PfamGraphicResponse) {
+func DrawPNG(w io.Writer, dpi float64, changelist []string, g *data.GraphicResponse) {
 	DefaultSettings.dpi = 0
 	DefaultSettings.DrawPNG(w, dpi, changelist, g)
 }
 
 // DrawPNG writes PNG image to w, with the provided changes in changelist and
-// Pfam domain/region information in g. If GraphicWidth=0, then AutoWidth is called
+// domain/region information in g. If GraphicWidth=0, then AutoWidth is called
 // to determine the best diagram width to fit all labels.
-func (s *Settings) DrawPNG(w io.Writer, dpi float64, changelist []string, g *data.PfamGraphicResponse) {
+func (s *Settings) DrawPNG(w io.Writer, dpi float64, changelist []string, g *data.GraphicResponse) {
 	if s.dpi == 0 {
 		dpiScale := dpi / 72.0
 		s.LollipopRadius *= dpiScale
@@ -218,7 +218,7 @@ func (s *diagram) png(w io.Writer) {
 		startY += 14.0
 		// 15% darker than backbone (i.e. disordered color)
 		clr := color.RGBA{0x9E, 0xA0, 0x9A, 0xFF}
-		if key != data.PfamMotifNames["disorder"] {
+		if key != data.MotifNames["disorder"] {
 			clr = colorFromHex(BlendColorStrings(colorstring, "#FFFFFF"))
 		}
 		drawRectWHShadow(img, 4, startY, 12, 12, clr, 2*s.dpi/72.0)

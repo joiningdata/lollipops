@@ -41,7 +41,7 @@ func getValueForKey(line, key string) string {
 	return ""
 }
 
-func GetUniprotGraphicData(accession string) (*PfamGraphicResponse, error) {
+func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 	queryURL := fmt.Sprintf(UniprotDataURL, accession)
 	resp, err := http.Get(queryURL)
 	if err != nil {
@@ -63,7 +63,7 @@ func GetUniprotGraphicData(accession string) (*PfamGraphicResponse, error) {
 	trimTags := regexp.MustCompile("[{][^}]*[}]")
 	minisplit := regexp.MustCompile("[;.]")
 
-	gd := &PfamGraphicResponse{}
+	gd := &GraphicResponse{}
 	for _, bline := range bytes.Split(respBytes, []byte("\n")) {
 		if len(bline) < 5 {
 			continue
@@ -124,13 +124,13 @@ func GetUniprotGraphicData(accession string) (*PfamGraphicResponse, error) {
 				shortDesc = strings.TrimSpace(p[0])
 			}
 
-			feat := PfamGraphicFeature{
+			feat := GraphicFeature{
 				Color: fdata[2],
 				Text:  strings.Trim(shortDesc, ". "),
 				Type:  fdata[1],
 				Start: json.Number(fromPos),
 				End:   json.Number(toPos),
-				Metadata: PfamGraphicMetadata{
+				Metadata: GraphicMetadata{
 					Description: strings.Trim(shortDesc, ". "),
 				},
 			}
