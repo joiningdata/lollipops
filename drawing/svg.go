@@ -141,7 +141,7 @@ func (s *diagram) svg(w io.Writer) {
 		sstart *= scale
 		swidth = (swidth * scale) - sstart
 
-		fmt.Fprintf(w, `<g transform="translate(%f,%f)"><a xlink:href="%s" xlink:title="%s">`, s.Padding+sstart, startY, "http://pfam.xfam.org"+r.Link, r.Metadata.Description)
+		fmt.Fprintf(w, `<g transform="translate(%f,%f)"><a xlink:href="%s" xlink:title="%s">`, s.Padding+sstart, startY, r.Link, r.Metadata.Description)
 		fmt.Fprintf(w, `<rect fill="%s" x="0" y="0" width="%f" height="%f" filter="url(#ds)"/>`, r.Color, swidth, s.DomainHeight)
 		if swidth > 10 && s.domainLabels[ri] != "" {
 			fmt.Fprintf(w, `<text style="font-size:12px;%sfill:#ffffff;" text-anchor="middle" x="%f" y="%f">%s</text>`,

@@ -41,28 +41,23 @@ var PfamMotifNames = map[string]string{
 
 // PfamGraphicFeature is a generic representation of various Pfam feature responses
 type PfamGraphicFeature struct {
-	Color         string              `json:"colour"`
-	StartStyle    string              `json:"startStyle"`
-	EndStyle      string              `json:"endStyle"`
-	Text          string              `json:"text"`
-	Type          string              `json:"type"`
-	Start         json.Number         `json:"start"`
-	End           json.Number         `json:"end"`
-	ShouldDisplay bool                `json:"display"`
-	Link          string              `json:"href"`
-	Metadata      PfamGraphicMetadata `json:"metadata"`
+	Color    string              `json:"colour"`
+	Text     string              `json:"text"`
+	Type     string              `json:"type"`
+	Start    json.Number         `json:"start"`
+	End      json.Number         `json:"end"`
+	Link     string              `json:"href"`
+	Metadata PfamGraphicMetadata `json:"metadata"`
 	// many unused fields...
 }
 
 type PfamGraphicMetadata struct {
-	Accession   string `json:"accession"`
 	Description string `json:"description"`
 	Identifier  string `json:"identifier"`
 }
 
 type PfamGraphicResponse struct {
 	Length   json.Number          `json:"length"`
-	Markups  []PfamGraphicFeature `json:"markups"`
 	Metadata PfamGraphicMetadata  `json:"metadata"`
 	Motifs   []PfamGraphicFeature `json:"motifs"`
 	Regions  []PfamGraphicFeature `json:"regions"`
@@ -76,6 +71,18 @@ func GetLocalPfamGraphicData(filename string) (*PfamGraphicResponse, error) {
 	pf := &PfamGraphicResponse{}
 	err = json.NewDecoder(f).Decode(pf)
 	f.Close()
+	for i, x := range pf.Motifs {
+		if x.Link != "" && !strings.Contains(x.Link, "://") {
+			x.Link = "http://pfam.xfam.org" + x.Link
+			pf.Motifs[i] = x
+		}
+	}
+	for i, x := range pf.Regions {
+		if x.Link != "" && !strings.Contains(x.Link, "://") {
+			x.Link = "http://pfam.xfam.org" + x.Link
+			pf.Regions[i] = x
+		}
+	}
 	return pf, err
 }
 
@@ -106,6 +113,18 @@ func GetPfamGraphicData(accession string) (*PfamGraphicResponse, error) {
 		return nil, fmt.Errorf("pfam returned invalid result")
 	}
 	r := data[0]
+	for i, x := range r.Motifs {
+		if x.Link != "" {
+			x.Link = "http://pfam.xfam.org" + x.Link
+			r.Motifs[i] = x
+		}
+	}
+	for i, x := range r.Regions {
+		if x.Link != "" {
+			x.Link = "http://pfam.xfam.org" + x.Link
+			r.Regions[i] = x
+		}
+	}
 	return &r, nil
 }
 
