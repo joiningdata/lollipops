@@ -118,7 +118,7 @@ func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 			////////////////////////////
 		case "FT":
 			/// https://web.expasy.org/docs/userman.html#FT_line
-			if strings.TrimSpace(line[:29]) == "" {
+			if len(line) < 30 || strings.TrimSpace(line[:29]) == "" {
 				// continuation of previous line's description (ignored)
 				continue
 			}
