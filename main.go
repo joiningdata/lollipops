@@ -52,7 +52,8 @@ var (
 
 	fontPath = flag.String("f", "", "Path to truetype font to use for drawing (defaults to Arial.ttf)")
 
-	localPath = flag.String("l", "", "Path to local json graphic data (Pfam response format)")
+	localPath     = flag.String("l", "", "Path to local json graphic data (Pfam response format)")
+	alternateData = flag.Bool("uniprot", false, "fetch alternative domain/motif information from Uniprot instead of Pfam")
 )
 
 func main() {
@@ -111,7 +112,9 @@ Output options:
   -w=700                  set diagram pixel width (default = automatic fit)
   -dpi=300                set DPI (PNG output only)
 
-Local file input:
+Alternative input sources:
+  -uniprot                use UniprotKB as an alternative to Pfam for
+                          fetching domain/motif information
   -l=filename.json        use local file instead of Pfam API for graphic data
                             see: http://pfam.xfam.org/help#tabview=tab9
 `)
@@ -193,6 +196,8 @@ Press Enter/Ctrl-C to quit.`)
 	var d *data.PfamGraphicResponse
 	if *localPath != "" {
 		d, err = data.GetLocalPfamGraphicData(*localPath)
+	} else if *alternateData {
+		d, err = data.GetUniprotGraphicData(acc)
 	} else {
 		d, err = data.GetPfamGraphicData(acc)
 	}
@@ -202,7 +207,7 @@ Press Enter/Ctrl-C to quit.`)
 	}
 	if geneSymbol == "" {
 		geneSymbol = d.Metadata.Identifier
-		fmt.Fprintln(os.Stderr, "Pfam Symbol: ", geneSymbol)
+		fmt.Fprintln(os.Stderr, "Gene Symbol: ", geneSymbol)
 	}
 
 	if *output == "" {
