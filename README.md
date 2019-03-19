@@ -5,9 +5,9 @@
 
 A simple 'lollipop' mutation diagram generator that tries to make things
 simple and easy by automating as much as possible. It uses the
-[Pfam API](http://pfam.xfam.org/help#tabview=tab9) to retrieve domains and
-colors, and the [UniProt REST API](http://www.uniprot.org/uploadlists/) to
-translate HGNC Gene Symbols into Uniprot/SwissProt Accession number. If
+[UniProt REST API](http://www.uniprot.org/uploadlists/) and/or
+[Pfam API](http://pfam.xfam.org/help#tabview=tab9) to automate translation
+of Gene Symbols and lookup domain/motif features for display. If
 variant changes are provided, it will also annotate them to the diagram
 using the "lollipops" markers that give the tool it's name.
 
@@ -78,9 +78,11 @@ the area is exponentially proportional to the count indicated. Examples:
   -dpi=300                set DPI (PNG output only)
 ```
 
-#### Local file input:
+#### Alternative input sources:
 
 ```
+  -uniprot                use UniprotKB as an alternative to Pfam for
+                          fetching domain/motif information
   -l=filename.json        use local file instead of Pfam API for graphic data
                             see: http://pfam.xfam.org/help#tabview=tab9
 ```
@@ -111,7 +113,7 @@ func main() {
     uniprot_id := "P04637"
     mutations := []string{"R273C", "R175H", "T125@5", "R248Q#7f3333@131"}
 
-    p53_domains, err := data.GetPfamGraphicData(uniprot_id)
+    p53_domains, err := data.GetGraphicData(uniprot_id)
     if err != nil {
         panic(err)
     }
