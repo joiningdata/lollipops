@@ -228,3 +228,23 @@ Press Enter/Ctrl-C to quit.`)
 		drawing.DrawSVG(f, flag.Args()[varStart:], d)
 	}
 }
+package main
+
+import (
+    "os"
+
+    "github.com/pbnjay/lollipops/data"
+    "github.com/pbnjay/lollipops/drawing"
+)
+
+func main() {
+    uniprot_id := "P04637"
+    mutations := []string{"R273C", "R175H", "T125@5", "R248Q#7f3333@131"}
+
+    p53_domains, err := data.GetGraphicData(uniprot_id)
+    if err != nil {
+        panic(err)
+    }
+
+    drawing.DrawSVG(os.Stdout, mutations, p53_domains)
+}
