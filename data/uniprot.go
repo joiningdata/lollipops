@@ -221,7 +221,7 @@ func GetProtID(symbol string) (string, error) {
 }
 
 func GetProtMapping(dbname, geneid string) (string, error) {
-	apiURL := `http://www.uniprot.org/mapping/`
+	apiURL := `https://www.uniprot.org/uploadlists/`
 	params := url.Values{
 		"from":   {dbname},
 		"query":  {geneid}, // wish i could filter only reviewed:yes here...
