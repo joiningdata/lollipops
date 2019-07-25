@@ -1,0 +1,9 @@
+gene: TP53
+legend: true
+labels: true
+imagename: diagram.png
+variants:
+ - R248Q#7f3333@131
+ - R273C
+ - R175H
+ - T125@5
