@@ -2,6 +2,7 @@
 
 cwlVersion: v1.0
 class: CommandLineTool
+baseCommand: lollipops
 hints:
   DockerRequirement:
     dockerPull: pbnjay/lollipops:latest

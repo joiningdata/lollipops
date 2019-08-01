@@ -7,11 +7,11 @@ RUN apk update && \
     fc-cache -f && \
     adduser -D -g '' lollipops
 
-WORKDIR $GOPATH/src/github.com/pbnjay/lollipops
+WORKDIR /go/src/github.com/pbnjay/lollipops
 COPY . .
 
 RUN go get -d -v
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /go/bin/lollipops
+RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o /go/bin/lollipops
 
 
 ########################################################################
@@ -24,19 +24,18 @@ LABEL maintainer="Jeremy Jay <jeremy@pbnjay.com>"
 # Pull in a number of files from builder image
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /lib/ld-musl-x86_64.so.1 /lib/ld-musl-x86_64.so.1
 COPY --from=builder /usr/share/fonts/truetype/msttcorefonts/Arial.ttf /usr/share/fonts/truetype/msttcorefonts/arial.ttf
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 
 #   TODO:
 #    - limit entries in passwd (root, nobody, lollipops?)
 #    - do we need /etc/group?
-#    - why do I need to pull in libc?
 #    - do we need /tmp? /dev entries?
 
-COPY --from=builder /go/bin/lollipops /go/bin/lollipops
+COPY --from=builder /go/bin/lollipops /bin/lollipops
 
 USER lollipops
 
-ENTRYPOINT ["/go/bin/lollipops"]
-CMD ["-legend", "-labels", "TP53", "R248Q#7f3333@131", "R273C", "R175H", "T125@5"]
+WORKDIR /data
+VOLUME /data
+CMD ["/bin/lollipops", "-legend", "-labels", "TP53", "R248Q#7f3333@131", "R273C", "R175H", "T125@5"]
