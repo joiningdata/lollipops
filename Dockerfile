@@ -1,10 +1,9 @@
 FROM golang:alpine AS builder
 
 RUN apk update && \
-    apk add --no-cache git ca-certificates fontconfig msttcorefonts-installer tzdata && \
+    apk add --no-cache git ca-certificates msttcorefonts-installer tzdata && \
     update-ca-certificates && \
     update-ms-fonts && \
-    fc-cache -f && \
     adduser -D -g '' lollipops
 
 WORKDIR /go/src/github.com/pbnjay/lollipops
@@ -26,12 +25,6 @@ COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /usr/share/fonts/truetype/msttcorefonts/Arial.ttf /usr/share/fonts/truetype/msttcorefonts/arial.ttf
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
-
-#   TODO:
-#    - limit entries in passwd (root, nobody, lollipops?)
-#    - do we need /etc/group?
-#    - do we need /tmp? /dev entries?
-
 COPY --from=builder /go/bin/lollipops /bin/lollipops
 
 USER lollipops
