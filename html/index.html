@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Lollipops - Protein Variant Visualization tool</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+	<!--
+	Add the following polyfill for Microsoft Edge 17/18 support:
+	<script src="https://cdn.jsdelivr.net/npm/text-encoding@0.7.0/lib/encoding.min.js"></script>
+	(see https://caniuse.com/#feat=textencoder)
+	-->
+	<script src="wasm_exec.js"></script>
+	<script>
+		if (!WebAssembly.instantiateStreaming) { // polyfill
+			WebAssembly.instantiateStreaming = async (resp, importObject) => {
+				const source = await (await resp).arrayBuffer();
+				return await WebAssembly.instantiate(source, importObject);
+			};
+		}
+
+		const go = new Go();
+		let mod, inst;
+		WebAssembly.instantiateStreaming(fetch("lollipops.wasm"), go.importObject).then((result) => {
+			mod = result.module;
+			inst = result.instance;
+			document.getElementById("runButton").disabled = false;
+			document.getElementById("spinner").style.display = "none";
+		}).catch((err) => {
+			console.error(err);
+		});
+
+		async function run() {
+			console.clear();
+			var args = ['./lollipops', "-o", "lollipops-image"];
+			if( document.getElementById('legend').checked ) {
+				args.push("-legend");
+			}
+			if( document.getElementById('labels').checked ) {
+				args.push("-labels");
+			}
+			var idt = document.getElementById('id_type');
+			idt = idt.options[idt.selectedIndex].value;
+			if( idt != "" ) {
+				args = args.concat(idt.split(" "));
+			}
+			args.push(document.getElementById('gene_id').value);
+			args = args.concat(document.getElementById('vars').value.split(/\s+/));
+			go.argv = args; 
+			document.getElementById("spinner").style.display = "block";
+			await go.run(inst);
+			var elem = document.getElementById("lollipops-svg-container").children[0];
+			elem.setAttribute("viewBox", "0 0 "+elem.width.baseVal.value+" "+elem.height.baseVal.value);
+			elem.setAttribute("width", "100%");
+			elem.removeAttribute("height")
+
+			document.getElementById("printButton").disabled = false;
+			document.getElementById("spinner").style.display = "none";
+			inst = await WebAssembly.instantiate(mod, go.importObject); // reset instance
+		}
+
+		async function toggleHelp(){
+			if( document.getElementById("varhelp").style.display == "block" ) {
+				document.getElementById("varhelp").style.display = "none";
+			} else {
+				document.getElementById("varhelp").style.display = "block";
+			}
+		}
+
+		/*
+		async function print() {
+			var elem = document.getElementById("lollipops-svg-container").children[0];
+			var popupWin = window.open('', '_blank', 'scrollbars=no,menubar=no,toolbar=no,location=no,status=no,titlebar=no');
+    		popupWin.document.open();
+    		popupWin.document.write('<html><head><style>svg{font-family:sans-serif;}</style></head><body onload="window.print()">' + elem.outerHTML + '</body></html>');
+			popupWin.document.close();
+		}*/
+	</script>
+
+	<fieldset class="no-print">
+		<label>Gene to Annotate:</label><br/>
+		<select id="id_type">
+			<option selected value="">Gene Symbol (e.g. TP53, BRCA)</option>
+			<option value="-Q P_REFSEQ_AC">RefSeq ID (e.g. NP_001265252.1)</option>
+     		<option value="-Q P_ENTREZGENEID">Entrez GeneID (e.g. 4336)</option>
+     		<option value="-Q ENSEMBL_ID">Ensembl Gene ID (e.g. ENSG00000168314)</option>
+		</select>:
+		<input type="text" id="gene_id" value="TP53"><br><br>
+
+		<label>Variants: <a href="#" onclick="toggleHelp();return false;">variant format</a></label><br>
+		<textarea cols="100" rows="5" id="vars">R248Q#ff99ff@131
+R273C
+R175H
+T125@5</textarea><br>
+<pre id="varhelp" style="display:none;">Currently only point mutations are supported, and may be specified as:
+
+	&lt;AMINO&gt;<b>&lt;CODON&gt;</b>&lt;AMINO&gt;&lt;#COLOR&gt;&lt;@COUNT&gt;
+
+Only CODON is required, and AMINO tags are not parsed.
+
+Synonymous mutations are denoted if the first AMINO tag matches the second
+AMINO tag, or if the second tag is not present. Otherwise the non-synonymous
+mutation color is used. The COLOR tag will override using the #RRGGBB style
+provided. The COUNT tag can be used to scale the lollipop marker size so that
+the area is exponentially proportional to the count indicated. Examples:
+
+	R273C            -- non-synonymous mutation at codon 273
+	T125@5           -- synonymous mutation at codon 125 with "5x" marker sizing
+	R248Q#00ff00     -- green lollipop at codon 248
+	R248Q#00ff00@131 -- green lollipop at codon 248 with "131x" marker sizing
+
+Separate multiple variants with a space, or place them on separate lines.
+</pre></span><br>
+	<br>
+	<label><input type="checkbox" id="legend" checked> Show Legend</label><br>
+	<label><input type="checkbox" id="labels"> Show Lollipop Labels</label><br>
+
+	<button onClick="run();" id="runButton" disabled>Run</button>
+	<button onClick="window.print();" id="printButton" disabled>Print</button>
+
+	<div id="spinner" class="sk-fading-circle">
+		<div class="sk-circle1 sk-circle"></div>
+		<div class="sk-circle2 sk-circle"></div>
+		<div class="sk-circle3 sk-circle"></div>
+		<div class="sk-circle4 sk-circle"></div>
+		<div class="sk-circle5 sk-circle"></div>
+		<div class="sk-circle6 sk-circle"></div>
+		<div class="sk-circle7 sk-circle"></div>
+		<div class="sk-circle8 sk-circle"></div>
+		<div class="sk-circle9 sk-circle"></div>
+		<div class="sk-circle10 sk-circle"></div>
+		<div class="sk-circle11 sk-circle"></div>
+		<div class="sk-circle12 sk-circle"></div>
+	  </div>
+	</fieldset>
+
+	<!-- canvas id="lollipops-image" style="max-width:90%;"></canvas -->
+	<div id="lollipops-svg-container" style="max-width:90%;"></div>
+
+	<div class="footer">
+	<b>Citation:</b>
+	<p>Jay JJ, Brouwer C (2016) Lollipops in the Clinic: Information Dense
+		Mutation Plots for Precision Medicine. PLoS ONE 11(8): e0160519.
+		doi: <a href="http://dx.doi.org/10.1371/journal.pone.0160519"
+		rel="nofollow">10.1371/journal.pone.0160519</a>.
+	</p>
+	<br>
+	<p>This tool is also available as a command-line program that may be incorporated
+		into your own pipelines. Open source at <a href="https://github.com/pbnjay/lollipops">https://github.com/pbnjay/lollipops</a>.</p>
+	</div>
+</body>
+</html>

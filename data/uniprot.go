@@ -24,7 +24,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"regexp"
@@ -61,7 +60,7 @@ func getValueForKey(line, key string) string {
 
 func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 	queryURL := fmt.Sprintf(UniprotDataURL, accession)
-	resp, err := http.Get(queryURL)
+	resp, err := httpGet(queryURL)
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			fmt.Fprintf(os.Stderr, "Unable to connect to Uniprot. Check your internet connection or try again later.")
@@ -167,11 +166,11 @@ func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 }
 
 func GetProtID(symbol string) (string, error) {
-	apiURL := `http://www.uniprot.org/uniprot/?query=` + url.QueryEscape(symbol)
+	apiURL := `https://www.uniprot.org/uniprot/?query=` + url.QueryEscape(symbol)
 	apiURL += `+AND+reviewed:yes+AND+organism:9606+AND+database:pfam`
 	apiURL += `&sort=score&columns=id,entry+name,reviewed,genes,organism&format=tab`
 
-	resp, err := http.Get(apiURL)
+	resp, err := httpGet(apiURL)
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			fmt.Fprintf(os.Stderr, "Unable to connect to Uniprot. Check your internet connection or try again later.")
@@ -229,7 +228,7 @@ func GetProtMapping(dbname, geneid string) (string, error) {
 		"format": {"tab"},
 	}
 
-	resp, err := http.PostForm(apiURL, params)
+	resp, err := httpPostForm(apiURL, params)
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			fmt.Fprintf(os.Stderr, "Unable to connect to Uniprot. Check your internet connection or try again later.")

@@ -214,17 +214,9 @@ Press Enter/Ctrl-C to quit.`)
 		*output = geneSymbol + ".svg"
 	}
 
-	f, err := os.OpenFile(*output, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
+	err = createOutput(*output, d, flag.Args()[varStart:])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
-	}
-	defer f.Close()
-
-	fmt.Fprintln(os.Stderr, "Drawing diagram to", *output)
-	if strings.HasSuffix(strings.ToLower(*output), ".png") {
-		drawing.DrawPNG(f, *dpi, flag.Args()[varStart:], d)
-	} else {
-		drawing.DrawSVG(f, flag.Args()[varStart:], d)
 	}
 }

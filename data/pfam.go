@@ -22,15 +22,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
-	"net/http"
 	"os"
 )
 
-const PfamGraphicURL = "http://pfam.xfam.org/protein/%s/graphic"
+const PfamGraphicURL = "https://pfam.xfam.org/protein/%s/graphic"
 
 func GetPfamGraphicData(accession string) (*GraphicResponse, error) {
 	queryURL := fmt.Sprintf(PfamGraphicURL, accession)
-	resp, err := http.Get(queryURL)
+	resp, err := httpGet(queryURL)
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			fmt.Fprintf(os.Stderr, "Unable to connect to Pfam. Check your internet connection or try again later.")
@@ -57,13 +56,13 @@ func GetPfamGraphicData(accession string) (*GraphicResponse, error) {
 	r := data[0]
 	for i, x := range r.Motifs {
 		if x.Link != "" {
-			x.Link = "http://pfam.xfam.org" + x.Link
+			x.Link = "https://pfam.xfam.org" + x.Link
 			r.Motifs[i] = x
 		}
 	}
 	for i, x := range r.Regions {
 		if x.Link != "" {
-			x.Link = "http://pfam.xfam.org" + x.Link
+			x.Link = "https://pfam.xfam.org" + x.Link
 			r.Regions[i] = x
 		}
 	}

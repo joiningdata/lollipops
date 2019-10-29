@@ -38,6 +38,11 @@ type diagram struct {
 }
 
 func (s *Settings) prepare(changelist []string, g *data.GraphicResponse) *diagram {
+	// don't alter the source changelist
+	newchanges := make([]string, len(changelist))
+	copy(newchanges, changelist)
+	changelist = newchanges
+
 	d := &diagram{
 		Settings:   s,
 		g:          g,
