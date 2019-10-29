@@ -4,17 +4,25 @@
 	{
 		display: none !important;
 	}
-	body {margin-top:64px;}
+  body {margin-top:64px;}
+  .navbar, #footer {
+    display: none !important;
+  }
+
+  .container {
+    width: 100% !important;
+  }
 }
 
 svg { font-family: sans-serif; }
 
 .sk-fading-circle {
-  width: 40px;
-  height: 40px;
-  position: fixed;
-  top: 5%;
-  left: 50%;
+  width: 28px;
+  height: 28px;
+  display: inline-block;
+  margin: 4px 0 0 10px;
+  padding: 0;
+  position: absolute;
 }
 
 .sk-fading-circle .sk-circle {
@@ -146,7 +154,7 @@ svg { font-family: sans-serif; }
   40% { opacity: 1; } 
 }
 
-.footer {
+.moreinfo {
 	font-family: sans-serif;
 	margin-top: 64px;
 	font-size: 10px;

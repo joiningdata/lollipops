@@ -1,5 +1,5 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 	<meta charset="utf-8">
 	<title>Lollipops - Protein Variant Visualization tool</title>
@@ -49,7 +49,7 @@
 			args.push(document.getElementById('gene_id').value);
 			args = args.concat(document.getElementById('vars').value.split(/\s+/));
 			go.argv = args; 
-			document.getElementById("spinner").style.display = "block";
+			document.getElementById("spinner").style.display = "inline-block";
 			await go.run(inst);
 			var elem = document.getElementById("lollipops-svg-container").children[0];
 			elem.setAttribute("viewBox", "0 0 "+elem.width.baseVal.value+" "+elem.height.baseVal.value);
@@ -80,20 +80,20 @@
 	</script>
 
 	<fieldset class="no-print">
-		<label>Gene to Annotate:</label><br/>
+		<label>Gene to Annotate:</label>
 		<select id="id_type">
 			<option selected value="">Gene Symbol (e.g. TP53, BRCA)</option>
 			<option value="-Q P_REFSEQ_AC">RefSeq ID (e.g. NP_001265252.1)</option>
      		<option value="-Q P_ENTREZGENEID">Entrez GeneID (e.g. 4336)</option>
      		<option value="-Q ENSEMBL_ID">Ensembl Gene ID (e.g. ENSG00000168314)</option>
 		</select>:
-		<input type="text" id="gene_id" value="TP53"><br><br>
+		<input type="text" id="gene_id" value="TP53">
 
-		<label>Variants: <a href="#" onclick="toggleHelp();return false;">variant format</a></label><br>
+		<label>Variants: <a href="#" onclick="toggleHelp();return false;">variant format</a></label>
 		<textarea cols="100" rows="5" id="vars">R248Q#ff99ff@131
 R273C
 R175H
-T125@5</textarea><br>
+T125@5</textarea>
 <pre id="varhelp" style="display:none;">Currently only point mutations are supported, and may be specified as:
 
 	&lt;AMINO&gt;<b>&lt;CODON&gt;</b>&lt;AMINO&gt;&lt;#COLOR&gt;&lt;@COUNT&gt;
@@ -112,12 +112,11 @@ the area is exponentially proportional to the count indicated. Examples:
 	R248Q#00ff00@131 -- green lollipop at codon 248 with "131x" marker sizing
 
 Separate multiple variants with a space, or place them on separate lines.
-</pre></span><br>
-	<br>
-	<label><input type="checkbox" id="legend" checked> Show Legend</label><br>
-	<label><input type="checkbox" id="labels"> Show Lollipop Labels</label><br>
+</pre></span>
+	<label><input type="checkbox" id="legend" checked> Show Legend</label>
+	<label><input type="checkbox" id="labels"> Show Lollipop Labels</label>
 
-	<button onClick="run();" id="runButton" disabled>Run</button>
+	<button onClick="run();" id="runButton" disabled>Draw</button>
 	<button onClick="window.print();" id="printButton" disabled>Print</button>
 
 	<div id="spinner" class="sk-fading-circle">
@@ -139,7 +138,7 @@ Separate multiple variants with a space, or place them on separate lines.
 	<!-- canvas id="lollipops-image" style="max-width:90%;"></canvas -->
 	<div id="lollipops-svg-container" style="max-width:90%;"></div>
 
-	<div class="footer">
+	<div class="moreinfo">
 	<b>Citation:</b>
 	<p>Jay JJ, Brouwer C (2016) Lollipops in the Clinic: Information Dense
 		Mutation Plots for Precision Medicine. PLoS ONE 11(8): e0160519.
