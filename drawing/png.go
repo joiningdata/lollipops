@@ -27,7 +27,7 @@ import (
 	"log"
 
 	"github.com/golang/freetype/truetype"
-	"github.com/pbnjay/lollipops/data"
+	"github.com/joiningdata/lollipops/data"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )

@@ -28,8 +28,8 @@ import (
 	"strings"
 
 	"github.com/inconshreveable/mousetrap"
-	"github.com/pbnjay/lollipops/data"
-	"github.com/pbnjay/lollipops/drawing"
+	"github.com/joiningdata/lollipops/data"
+	"github.com/joiningdata/lollipops/drawing"
 )
 
 var (

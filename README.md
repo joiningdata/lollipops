@@ -89,11 +89,11 @@ the area is exponentially proportional to the count indicated. Examples:
 
 ## Installation
 
-Head over to the [Releases](https://github.com/pbnjay/lollipops/releases) to
+Head over to the [Releases](https://github.com/joiningdata/lollipops/releases) to
 download the latest version for your system in a simple command-line executable.
 
 If you already have Go installed and want the bleeding edge, just
-``go get -u github.com/pbnjay/lollipops`` to download the latest version.
+``go get -u github.com/joiningdata/lollipops`` to download the latest version.
 
 ## Embedding
 
@@ -105,8 +105,8 @@ package main
 import (
     "os"
 
-    "github.com/pbnjay/lollipops/data"
-    "github.com/pbnjay/lollipops/drawing"
+    "github.com/joiningdata/lollipops/data"
+    "github.com/joiningdata/lollipops/drawing"
 )
 
 func main() {
@@ -125,7 +125,7 @@ func main() {
 
 # CONTRIBUTING
 
-Please submit your bugs and features requests via the [Issues](https://github.com/pbnjay/lollipops/issues) tab. Be sure to
+Please submit your bugs and features requests via the [Issues](https://github.com/joiningdata/lollipops/issues) tab. Be sure to
 search closed issues before submitting a new one in case the issue has been
 previously discussed. Pull Requests are welcome, but please create an issue beforehand
 to discuss significant changes.

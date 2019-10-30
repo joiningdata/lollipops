@@ -6,7 +6,7 @@ RUN apk update && \
     update-ms-fonts && \
     adduser -D -g '' lollipops
 
-WORKDIR /go/src/github.com/pbnjay/lollipops
+WORKDIR /go/src/github.com/joiningdata/lollipops
 COPY . .
 
 RUN go get -d -v
@@ -17,7 +17,7 @@ RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o /go/bin/lollipops
 FROM scratch
 
 LABEL description="Lollipops command-line tool to generate variant annotation diagrams"
-LABEL url="https://github.com/pbnjay/lollipops"
+LABEL url="https://github.com/joiningdata/lollipops"
 LABEL maintainer="Jeremy Jay <jeremy@pbnjay.com>"
 
 # Pull in a number of files from builder image

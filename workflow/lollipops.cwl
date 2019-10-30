@@ -147,7 +147,7 @@ s:author:
     s:name: Jeremy Jay
 
 s:citation: http://dx.doi.org/10.1371/journal.pone.0160519
-s:codeRepository: https://github.com/pbnjay/lollipops
+s:codeRepository: https://github.com/joiningdata/lollipops
 s:dateCreated: "2014-09-12"
 s:license: https://spdx.org/licenses/GPL-3.0-only
 

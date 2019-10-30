@@ -23,7 +23,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/pbnjay/lollipops/data"
+	"github.com/joiningdata/lollipops/data"
 )
 
 type diagram struct {

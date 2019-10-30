@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/pbnjay/lollipops/data"
+	"github.com/joiningdata/lollipops/data"
 )
 
 const svgHeader = `<?xml version='1.0'?>
