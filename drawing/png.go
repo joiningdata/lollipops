@@ -54,6 +54,9 @@ func (s *Settings) DrawPNG(w io.Writer, dpi float64, changelist []string, g *dat
 		s.TextPadding *= dpiScale
 		s.dpi = dpi
 	}
+	if theFont == nil {
+		log.Fatalf("no font loaded - cannot make PNG!")
+	}
 	d := s.prepare(changelist, g)
 	d.png(w)
 }
