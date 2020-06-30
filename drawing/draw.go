@@ -19,11 +19,15 @@ package drawing
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 	"unicode"
 
+	"github.com/golang/freetype/truetype"
 	"github.com/joiningdata/lollipops/data"
+	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 )
 
 type diagram struct {
@@ -192,10 +196,10 @@ func (s *Settings) prepare(changelist []string, g *data.GraphicResponse) *diagra
 		label := ""
 
 		if swidth > 10 && s.DomainLabelStyle != "off" {
-			if len(r.Metadata.Description) > 1 && float64(MeasureFont(r.Metadata.Description, 12)) < (swidth-s.TextPadding) {
+			if len(r.Metadata.Description) > 1 && float64(s.MeasureFont(r.Metadata.Description, 12)) < (swidth-s.TextPadding) {
 				// we can fit the full description! nice!
 				label = r.Metadata.Description
-			} else if float64(MeasureFont(r.Text, 12)) < (swidth - s.TextPadding) {
+			} else if float64(s.MeasureFont(r.Text, 12)) < (swidth - s.TextPadding) {
 				label = r.Text
 			} else if s.DomainLabelStyle == "truncate" {
 				didOutput := false
@@ -216,7 +220,7 @@ func (s *Settings) prepare(changelist []string, g *data.GraphicResponse) *diagra
 						if i == 0 {
 							pre = ""
 						}
-						if float64(MeasureFont(pre+parts[i]+post, 12)) < (swidth - s.TextPadding) {
+						if float64(s.MeasureFont(pre+parts[i]+post, 12)) < (swidth - s.TextPadding) {
 							label = pre + parts[i] + post
 							didOutput = true
 							break
@@ -229,7 +233,7 @@ func (s *Settings) prepare(changelist []string, g *data.GraphicResponse) *diagra
 					sub := r.Text
 					for mx := len(r.Text) - 2; mx > 0; mx-- {
 						sub = strings.TrimFunc(r.Text[:mx], unicode.IsPunct) + ".."
-						if float64(MeasureFont(sub, 12)) < (swidth - s.TextPadding) {
+						if float64(s.MeasureFont(sub, 12)) < (swidth - s.TextPadding) {
 							break
 						}
 					}
@@ -246,7 +250,22 @@ func (s *Settings) prepare(changelist []string, g *data.GraphicResponse) *diagra
 	}
 
 	if s.legendInfo != nil {
-		s.GraphicHeight += float64(1+len(s.legendInfo)) * 14.0
+
+		fface := truetype.NewFace(theFont, &truetype.Options{
+			Size:    float64(12.0),
+			DPI:     float64(DefaultSettings.dpi),
+			Hinting: font.HintingFull,
+		})
+		// get font height in px
+		bounds, _, ok := fface.GlyphBounds('M')
+		if !ok {
+			log.Fatalf("unable to determine font bounds!")
+		}
+		// add 2px line spacing
+		fontH := bounds.Max.Sub(bounds.Min).Y + fixed.I(2)
+		s.GraphicHeight += float64(2 * fontH.Ceil())
+
+		s.GraphicHeight += float64(len(s.legendInfo)*fontH.Ceil()) * 1.2
 		for key, color := range s.legendInfo {
 			if rename, found := data.MotifNames[key]; found {
 				delete(s.legendInfo, key)

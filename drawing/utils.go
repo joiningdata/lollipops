@@ -88,7 +88,7 @@ func (s *Settings) AutoWidth(g *data.GraphicResponse) float64 {
 		send, _ := r.End.Float64()
 
 		aaPart := (send - sstart) / aaLen
-		minTextWidth := float64(MeasureFont(r.Text, 12)) + (s.TextPadding * 2) + 1
+		minTextWidth := float64(s.MeasureFont(r.Text, 12)) + (s.TextPadding * 2) + 1
 
 		ww := minTextWidth / aaPart
 		if ww > w {

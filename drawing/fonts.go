@@ -74,12 +74,12 @@ func LoadFont(name, path string) error {
 // MeasureFont returns the pixel width of the string s at font size sz.
 // It tries to use system Arial font if possible, but falls back to a
 // conservative ballpark estimate otherwise.
-func MeasureFont(s string, sz int) int {
+func (x *Settings) MeasureFont(s string, sz int) int {
 	// use actual TTF font metrics if available
 	if theFont != nil {
 		myFace := truetype.NewFace(theFont, &truetype.Options{
 			Size: float64(sz),
-			DPI:  float64(DefaultSettings.dpi),
+			DPI:  float64(x.dpi),
 		})
 		d := &font.Drawer{Face: myFace}
 		w := d.MeasureString(s)
