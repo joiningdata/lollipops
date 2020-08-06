@@ -44,6 +44,7 @@ type GraphicFeature struct {
 	Metadata GraphicMetadata `json:"metadata"`
 }
 
+//GraphicMetaData this is a test ________________________________________
 type GraphicMetadata struct {
 	Description string `json:"description"`
 	Identifier  string `json:"identifier"`
