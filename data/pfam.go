@@ -27,6 +27,7 @@ import (
 
 const PfamGraphicURL = "https://pfam.xfam.org/protein/%s/graphic"
 
+//GetPfamGraphicData retrieves the Graphical data from Pfam database and feeds into GraphicResponse struct
 func GetPfamGraphicData(accession string) (*GraphicResponse, error) {
 	queryURL := fmt.Sprintf(PfamGraphicURL, accession)
 	resp, err := httpGet(queryURL)
