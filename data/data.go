@@ -44,12 +44,13 @@ type GraphicFeature struct {
 	Metadata GraphicMetadata `json:"metadata"`
 }
 
-//GraphicMetaData this is a test ________________________________________
+// GraphicMetaData is a generic representation of various metadata features
 type GraphicMetadata struct {
 	Description string `json:"description"`
 	Identifier  string `json:"identifier"`
 }
 
+// GraphicResponse is a generic representation of various groupings of features
 type GraphicResponse struct {
 	Length   json.Number      `json:"length"`
 	Metadata GraphicMetadata  `json:"metadata"`
@@ -57,6 +58,7 @@ type GraphicResponse struct {
 	Regions  []GraphicFeature `json:"regions"`
 }
 
+// GetLocalGraphicData parses a given file name and feeds data into various structs
 func GetLocalGraphicData(filename string) (*GraphicResponse, error) {
 	f, err := os.Open(filename)
 	if err != nil {
