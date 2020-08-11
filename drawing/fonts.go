@@ -36,6 +36,7 @@ var (
 // 2) allow users to set a different font if desired
 //
 
+//LoadDefaultFont attempts to load the default Arial Font from common OS font paths
 func LoadDefaultFont() error {
 	// try to find Arial in the most common locations
 	commonPaths := []string{
@@ -58,6 +59,7 @@ func LoadDefaultFont() error {
 	return fmt.Errorf("unable to find Arial.ttf")
 }
 
+//LoadFont loads the user provided font from the provided path
 func LoadFont(name, path string) error {
 	fontBytes, err := ioutil.ReadFile(path)
 	if err != nil {
