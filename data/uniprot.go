@@ -221,7 +221,7 @@ func GetProtID(symbol string) (string, error) {
 	return protID, nil
 }
 
-// GetProtMapping retrieves the Protein ID when alternate query database with different identifier type is used, returns the UniProt identifier using the Uniprot Retrieve/ID mapping tool
+// GetProtMapping retrieves the Protein ID when alternate query database is used with different identifier type is used, returns the UniProt identifier using the Uniprot Retrieve/ID mapping tool
 func GetProtMapping(dbname, geneid string) (string, error) {
 	apiURL := `https://www.uniprot.org/uploadlists/`
 	params := url.Values{
