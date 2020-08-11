@@ -28,6 +28,7 @@ import (
 
 var stripChangePos = regexp.MustCompile("(^|[A-Za-z]*)([0-9]+)([A-Za-z]*)")
 
+//Tick type represents a tick storing it's position, priority, count, column, if the Tick is lollipop, label, x value, y value, and r value
 type Tick struct {
 	Pos int
 	Pri int
@@ -41,8 +42,10 @@ type Tick struct {
 	r          float64
 }
 
+//Tickslice represents a slice of elements with type Tick
 type TickSlice []Tick
 
+//Nextbetter returns the next tick in tickslice with greatest distance between tick positions
 func (t TickSlice) NextBetter(i, maxDist int) int {
 	for j := i; j < len(t); j++ {
 		if (t[j].Pos - t[i].Pos) > maxDist {
@@ -56,8 +59,13 @@ func (t TickSlice) NextBetter(i, maxDist int) int {
 }
 
 // implement sort interface
-func (t TickSlice) Len() int      { return len(t) }
+//Len Returns the length of a Tickslice passed
+func (t TickSlice) Len() int { return len(t) }
+
+//Swap Swaps elements of type Tick of given indices in a Tickslice
 func (t TickSlice) Swap(i, j int) { t[i], t[j] = t[j], t[i] }
+
+//Less Returns the element of type Tick that has a lesser position value. If position value is equal then Less returns the Tick with higher priority.
 func (t TickSlice) Less(i, j int) bool {
 	if t[i].Pos == t[j].Pos {
 		// sort high-priority first if same
@@ -98,6 +106,7 @@ func (s *Settings) AutoWidth(g *data.GraphicResponse) float64 {
 	return w + (s.Padding * 2)
 }
 
+//Radius Returns the radius of the "lollipop" from the Settings type
 func (t *Tick) Radius(s *Settings) float64 {
 	if t.Cnt <= 1 {
 		return s.LollipopRadius
