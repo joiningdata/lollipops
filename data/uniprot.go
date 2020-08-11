@@ -58,6 +58,7 @@ func getValueForKey(line, key string) string {
 	return ""
 }
 
+// GetUniprotGraphicData retrieves the Graphical data from Uniprot database and feeds into Regions and Motifs in GraphicResponse Struct
 func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 	queryURL := fmt.Sprintf(UniprotDataURL, accession)
 	resp, err := httpGet(queryURL)
@@ -165,6 +166,7 @@ func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 	return gd, nil
 }
 
+//GetProtID retrieves the protein ID from Uniprot using query and returns protein ID if found
 func GetProtID(symbol string) (string, error) {
 	apiURL := `https://www.uniprot.org/uniprot/?query=` + url.QueryEscape(symbol)
 	apiURL += `+AND+reviewed:yes+AND+organism:9606+AND+database:pfam`
@@ -219,6 +221,7 @@ func GetProtID(symbol string) (string, error) {
 	return protID, nil
 }
 
+// GetProtMapping retrieves the Protein ID when alternate query database with different identifier type is used, returns the UniProt identifier using the Uniprot Retrieve/ID mapping tool
 func GetProtMapping(dbname, geneid string) (string, error) {
 	apiURL := `https://www.uniprot.org/uploadlists/`
 	params := url.Values{
@@ -229,6 +232,7 @@ func GetProtMapping(dbname, geneid string) (string, error) {
 	}
 
 	resp, err := httpPostForm(apiURL, params)
+
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			fmt.Fprintf(os.Stderr, "Unable to connect to Uniprot. Check your internet connection or try again later.")
