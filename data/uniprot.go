@@ -30,7 +30,7 @@ import (
 	"strings"
 )
 
-const UniprotDataURL = "https://www.uniprot.org/uniprot/%s.txt"
+const UniprotDataURL = "https://rest.uniprot.org/uniprotkb/%s.txt"
 
 var defaultUniprotFeatures = map[string][]string{
 	"COILED":   {"motif", "coiled_coil", "#9cff00"},

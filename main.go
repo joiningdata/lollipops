@@ -59,7 +59,7 @@ var (
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [options] {-Q UNIPROT_DB IDENTIFER | -U UNIPROT_ID | GENE_SYMBOL} [PROTEIN CHANGES ...]\n", os.Args[0])
-		fmt.Fprintln(os.Stderr, `
+		fmt.Fprint(os.Stderr, `
 Protein ID input:
   GENE_SYMBOL is the official human HGNC gene symbol. This will use the
   UniprotKB API to lookup the UNIPROT_ID.
@@ -117,6 +117,7 @@ Alternative input sources:
                           fetching domain/motif information
   -l=filename.json        use local file instead of Pfam API for graphic data
                             see: http://pfam.xfam.org/help#tabview=tab9
+
 `)
 	}
 

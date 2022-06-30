@@ -19,7 +19,10 @@ package drawing
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
+	"net/http"
+	"os"
 
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -29,6 +32,8 @@ var (
 	FontName string
 	theFont  *truetype.Font
 )
+
+var defaultFontURL = "https://github.com/googlefonts/opensans/raw/main/fonts/ttf/OpenSans-Regular.ttf"
 
 // we try to have sane defaults wrt font usage
 //
@@ -55,6 +60,32 @@ func LoadDefaultFont() error {
 			return nil
 		}
 	}
+	err := LoadFont("OpenSans", "OpenSans-Regular.ttf")
+	if err == nil {
+		return nil
+	}
+
+	resp, err := http.Get(defaultFontURL)
+	if err == nil {
+		fmt.Fprintln(os.Stderr, "Downloading Font: OpenSans-Regular.ttf (Apache Licensed)")
+		fmt.Fprintln(os.Stderr, "Learn more about usage at https://github.com/googlefonts/opensans")
+		fmt.Fprint(os.Stderr, "Or provide a different truetype font with -f fontname.ttf\n\n")
+
+		f, err := os.Create("OpenSans-Regular.ttf")
+		if err == nil {
+			n, err := io.Copy(f, resp.Body)
+			if n == 0 || err != nil {
+				return fmt.Errorf("failed to download a font to use")
+			}
+		}
+		f.Close()
+		resp.Body.Close()
+		err = LoadFont("OpenSans", "OpenSans-Regular.ttf")
+		if err == nil {
+			return nil
+		}
+	}
+
 	return fmt.Errorf("unable to find Arial.ttf")
 }
 

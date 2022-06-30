@@ -271,7 +271,7 @@ func vline(img draw.Image, x, y0, y1 int, clr color.Color) {
 
 func drawRectWH(img draw.Image, x0, y0, w, h float64, clr color.Color) {
 	draw.Draw(img, image.Rect(int(x0), int(y0), int(x0+w), int(y0+h)),
-		&image.Uniform{clr}, image.ZP, draw.Over)
+		&image.Uniform{clr}, image.Point{}, draw.Over)
 }
 
 func drawRectWHShadow(img draw.Image, x0, y0, w, h float64, clr color.Color, shadowOffs float64) {
@@ -279,10 +279,10 @@ func drawRectWHShadow(img draw.Image, x0, y0, w, h float64, clr color.Color, sha
 	src := &image.Uniform{color.RGBA{0, 0, 0, 1 + uint8(75/shadowOffs)}}
 	for i := shadowOffs; i > 0; i-- {
 		r := image.Rect(int(x0+i), int(y0+i), int(x0+i+w), int(y0+i+h))
-		draw.Draw(img, r, src, image.ZP, draw.Over)
+		draw.Draw(img, r, src, image.Point{}, draw.Over)
 	}
 	r := image.Rect(int(x0), int(y0), int(x0+w), int(y0+h))
-	draw.Draw(img, r, &image.Uniform{clr}, image.ZP, draw.Over)
+	draw.Draw(img, r, &image.Uniform{clr}, image.Point{}, draw.Over)
 }
 
 // http://en.wikipedia.org/wiki/Midpoint_circle_algorithm

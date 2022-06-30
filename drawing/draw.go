@@ -64,7 +64,7 @@ func (s *Settings) prepare(changelist []string, g *data.GraphicResponse) *diagra
 	}
 
 	pops := TickSlice{}
-	col := s.SynonymousColor
+	var col string
 	s.GraphicHeight = s.DomainHeight + s.Padding*2
 	if len(changelist) > 0 {
 		popMatch := make(map[string]int)
@@ -133,8 +133,6 @@ func (s *Settings) prepare(changelist []string, g *data.GraphicResponse) *diagra
 
 	if len(pops) > 0 {
 		poptop := startY + s.LollipopRadius
-		popbot := poptop + s.LollipopHeight
-		startY = popbot - (s.DomainHeight-s.BackboneHeight)/2
 
 		// position lollipops
 		for pi, pop := range pops {
