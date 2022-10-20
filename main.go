@@ -116,7 +116,7 @@ Alternative input sources:
   -uniprot                use UniprotKB as an alternative to Pfam for
                           fetching domain/motif information
   -l=filename.json        use local file instead of Pfam API for graphic data
-                            see: http://pfam.xfam.org/help#tabview=tab9
+                            see: http://pfam-legacy.xfam.org/help#tabview=tab9
 
 `)
 	}

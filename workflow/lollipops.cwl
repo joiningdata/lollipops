@@ -128,7 +128,7 @@ inputs:
       prefix: "-uniprot"
   localDomainFile:
     doc: "get domain info from a file"
-    ## see: http://pfam.xfam.org/help#tabview=tab9
+    ## see: http://pfam-legacy.xfam.org/help#tabview=tab9
     type: File?
     inputBinding:
       prefix: "-l="

@@ -1,20 +1,21 @@
 # lollipops
 
 **Please cite this work as**
-* Jay JJ, Brouwer C (2016) Lollipops in the Clinic: Information Dense Mutation Plots for Precision Medicine. PLoS ONE 11(8): e0160519. doi: [10.1371/journal.pone.0160519](http://dx.doi.org/10.1371/journal.pone.0160519).
+
+- Jay JJ, Brouwer C (2016) Lollipops in the Clinic: Information Dense Mutation Plots for Precision Medicine. PLoS ONE 11(8): e0160519. doi: [10.1371/journal.pone.0160519](http://dx.doi.org/10.1371/journal.pone.0160519).
 
 A simple 'lollipop' mutation diagram generator that tries to make things
 simple and easy by automating as much as possible. It uses the
 [UniProt REST API](http://www.uniprot.org/uploadlists/) and/or
-[Pfam API](http://pfam.xfam.org/help#tabview=tab9) to automate translation
+[Pfam API](http://pfam-legacy.xfam.org/help#tabview=tab9) to automate translation
 of Gene Symbols and lookup domain/motif features for display. If
 variant changes are provided, it will also annotate them to the diagram
 using the "lollipops" markers that give the tool it's name.
 
 ## Example
 
-Basic usage is just the gene symbol (ex: ``TP53``) and a list of
-mutations (ex: ``R273C R175H T125 R248Q``)
+Basic usage is just the gene symbol (ex: `TP53`) and a list of
+mutations (ex: `R273C R175H T125 R248Q`)
 
     ./lollipops TP53 R273C R175H T125 R248Q
 
@@ -24,17 +25,17 @@ More advanced usage allows for per-mutation color (e.g. sample type) and
 size specification (e.g. denoting number of samples), along with text
 labels, a legend for abbreviated domains, and more:
 
-		./lollipops -legend -labels TP53 R248Q#7f3333@131 R273C R175H T125@5
+    	./lollipops -legend -labels TP53 R248Q#7f3333@131 R273C R175H T125@5
 
 ![TP53 Lollipop diagram with 5 customized mutations](tp53_more.png?raw=true)
 
 ## Usage
 
-Usage: ``lollipops [options] {-U UNIPROT_ID | GENE_SYMBOL} [PROTEIN CHANGES ...]``
+Usage: `lollipops [options] {-U UNIPROT_ID | GENE_SYMBOL} [PROTEIN CHANGES ...]`
 
 Where **GENE_SYMBOL** is the official human HGNC gene symbol. This will use the
 official API to lookup the **UNIPROT_ID**. To skip the lookup or use other species,
-specify the UniProt ID with -U (e.g. ``-U P04637`` for TP53)
+specify the UniProt ID with -U (e.g. `-U P04637` for TP53)
 
 #### Protein changes
 
@@ -84,7 +85,7 @@ the area is exponentially proportional to the count indicated. Examples:
   -uniprot                use UniprotKB as an alternative to Pfam for
                           fetching domain/motif information
   -l=filename.json        use local file instead of Pfam API for graphic data
-                            see: http://pfam.xfam.org/help#tabview=tab9
+                            see: http://pfam-legacy.xfam.org/help#tabview=tab9
 ```
 
 ## Installation
@@ -93,7 +94,7 @@ Head over to the [Releases](https://github.com/joiningdata/lollipops/releases) t
 download the latest version for your system in a simple command-line executable.
 
 If you already have Go installed and want the bleeding edge, just
-``go get -u github.com/joiningdata/lollipops`` to download the latest version.
+`go get -u github.com/joiningdata/lollipops` to download the latest version.
 
 ## Embedding
 

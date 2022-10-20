@@ -24,7 +24,7 @@ import (
 )
 
 // MotifNames has human-readable names
-//  - mostly from http://pfam.xfam.org/help#tabview=tab9
+//  - mostly from http://pfam-legacy.xfam.org/help#tabview=tab9
 var MotifNames = map[string]string{
 	"disorder":       "Disordered region",
 	"low_complexity": "Low complexity region",
@@ -66,13 +66,13 @@ func GetLocalGraphicData(filename string) (*GraphicResponse, error) {
 	f.Close()
 	for i, x := range pf.Motifs {
 		if x.Link != "" && !strings.Contains(x.Link, "://") {
-			x.Link = "http://pfam.xfam.org" + x.Link
+			x.Link = "http://pfam-legacy.xfam.org" + x.Link
 			pf.Motifs[i] = x
 		}
 	}
 	for i, x := range pf.Regions {
 		if x.Link != "" && !strings.Contains(x.Link, "://") {
-			x.Link = "http://pfam.xfam.org" + x.Link
+			x.Link = "http://pfam-legacy.xfam.org" + x.Link
 			pf.Regions[i] = x
 		}
 	}
