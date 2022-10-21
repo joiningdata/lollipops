@@ -25,7 +25,7 @@ import (
 	"os"
 )
 
-const PfamGraphicURL = "https://pfam.xfam.org/protein/%s/graphic"
+const PfamGraphicURL = "https://pfam-legacy.xfam.org/protein/%s/graphic"
 
 func GetPfamGraphicData(accession string) (*GraphicResponse, error) {
 	queryURL := fmt.Sprintf(PfamGraphicURL, accession)
@@ -56,13 +56,13 @@ func GetPfamGraphicData(accession string) (*GraphicResponse, error) {
 	r := data[0]
 	for i, x := range r.Motifs {
 		if x.Link != "" {
-			x.Link = "https://pfam.xfam.org" + x.Link
+			x.Link = "https://pfam-legacy.xfam.org" + x.Link
 			r.Motifs[i] = x
 		}
 	}
 	for i, x := range r.Regions {
 		if x.Link != "" {
-			x.Link = "https://pfam.xfam.org" + x.Link
+			x.Link = "https://pfam-legacy.xfam.org" + x.Link
 			r.Regions[i] = x
 		}
 	}
