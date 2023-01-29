@@ -21,13 +21,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/AvraamMavridis/randomcolor"
 )
 
 const UniprotDataURL = "https://rest.uniprot.org/uniprotkb/%s.txt"
@@ -60,7 +64,11 @@ func getValueForKey(line, key string) string {
 
 func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 	queryURL := fmt.Sprintf(UniprotDataURL, accession)
-	resp, err := httpGet(queryURL)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", queryURL, nil)
+	req.Header.Add("Accept-Encoding", "UTF-8")
+	resp, err := client.Do(req)
+
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			fmt.Fprintf(os.Stderr, "Unable to connect to Uniprot. Check your internet connection or try again later.")
@@ -68,19 +76,60 @@ func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 		}
 		return nil, err
 	}
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("pfam error: %s", resp.Status)
 	}
-
-	nouncertain := regexp.MustCompile("[?<>]")
 	trimTags := regexp.MustCompile("[{][^}]*[}]")
 	minisplit := regexp.MustCompile("[;.]")
 
 	gd := &GraphicResponse{}
+	pat := regexp.MustCompile(`FT\s+([A-Z_]+)\s+(\d+)\.\.(\d+)\nFT\s+\/note="([\w\s\d]+)"`)
+	matches := pat.FindAllSubmatch(respBytes, -1)
+
+	for _, match := range matches {
+		featureType := string(match[1])
+		fromPos := string(match[2]) //	'From' endpoint
+		toPos := string(match[3])   //	'To' endpoint
+		desc := string(match[4])    //	Description
+		if fromPos == "" || toPos == "" || fromPos == toPos {
+			// skip any unknown positions or point features
+			continue
+		}
+		fdata, ok := defaultUniprotFeatures[featureType]
+		if !ok {
+			continue
+		}
+		desc = strings.TrimSpace(trimTags.ReplaceAllString(desc, ""))
+		shortDesc := desc
+		if p := minisplit.Split(desc, 2); len(p) == 2 {
+			shortDesc = strings.TrimSpace(p[0])
+		}
+
+		feat := GraphicFeature{
+			Color: randomcolor.GetRandomColorInHex(),
+			Text:  strings.Trim(shortDesc, ". "),
+			Type:  fdata[1],
+			Start: json.Number(fromPos),
+			End:   json.Number(toPos),
+			Metadata: GraphicMetadata{
+				Description: strings.Trim(shortDesc, ". "),
+			},
+		}
+		switch fdata[0] {
+		case "region":
+			gd.Regions = append(gd.Regions, feat)
+		case "motif":
+			gd.Motifs = append(gd.Motifs, feat)
+		default:
+			log.Println("unknown feature set", fdata[0])
+		}
+	}
+
 	for _, bline := range bytes.Split(respBytes, []byte("\n")) {
 		if len(bline) < 5 {
 			continue
@@ -115,62 +164,24 @@ func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 				break
 			}
 			////////////////////////////
-		case "FT":
-			/// https://web.expasy.org/docs/userman.html#FT_line
-			if len(line) < 30 || strings.TrimSpace(line[:29]) == "" {
-				// continuation of previous line's description (ignored)
-				continue
-			}
-			featureType := strings.TrimSpace(line[:8])                                 //	Key name
-			fromPos := strings.TrimSpace(nouncertain.ReplaceAllString(line[9:15], "")) //	'From' endpoint
-			toPos := strings.TrimSpace(nouncertain.ReplaceAllString(line[16:22], ""))  //	'To' endpoint
-			desc := strings.TrimSpace(line[29:])                                       //	Description
-
-			if fromPos == "" || toPos == "" || fromPos == toPos {
-				// skip any unknown positions or point features
-				continue
-			}
-			fdata, ok := defaultUniprotFeatures[featureType]
-			if !ok {
-				continue
-			}
-
-			desc = strings.TrimSpace(trimTags.ReplaceAllString(desc, ""))
-			shortDesc := desc
-			if p := minisplit.Split(desc, 2); len(p) == 2 {
-				shortDesc = strings.TrimSpace(p[0])
-			}
-
-			feat := GraphicFeature{
-				Color: fdata[2],
-				Text:  strings.Trim(shortDesc, ". "),
-				Type:  fdata[1],
-				Start: json.Number(fromPos),
-				End:   json.Number(toPos),
-				Metadata: GraphicMetadata{
-					Description: strings.Trim(shortDesc, ". "),
-				},
-			}
-			switch fdata[0] {
-			case "region":
-				gd.Regions = append(gd.Regions, feat)
-			case "motif":
-				gd.Motifs = append(gd.Motifs, feat)
-			default:
-				log.Println("unknown feature set", fdata[0])
-			}
 		}
 	}
 
 	return gd, nil
 }
 
-func GetProtID(symbol string) (string, error) {
-	apiURL := `https://www.uniprot.org/uniprot/?query=` + url.QueryEscape(symbol)
-	apiURL += `+AND+reviewed:yes+AND+organism:9606+AND+database:pfam`
-	apiURL += `&sort=score&columns=id,entry+name,reviewed,genes,organism&format=tab`
+const UNIPROTRESTURL = "https://rest.uniprot.org/uniprotkb/search?query=%s+AND+reviewed:true+AND+organism_id:9606+AND+database:pfam&columns=id,entry+name,reviewed,genes,organism&format=tsv"
 
-	resp, err := httpGet(apiURL)
+func GetProtID(symbol string) (string, error) {
+	apiURL := fmt.Sprintf(UNIPROTRESTURL, symbol)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", apiURL, nil)
+	req.Header.Add("Accept-Encoding", "UTF-8")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			fmt.Fprintf(os.Stderr, "Unable to connect to Uniprot. Check your internet connection or try again later.")
@@ -178,7 +189,8 @@ func GetProtID(symbol string) (string, error) {
 		}
 		return "", err
 	}
-	respBytes, err := ioutil.ReadAll(resp.Body)
+
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -189,18 +201,15 @@ func GetProtID(symbol string) (string, error) {
 	bestHit := 0
 	protID := ""
 	for _, line := range strings.Split(string(respBytes), "\n") {
+		p := strings.Split(string(line), "\t")
+		for _, g := range strings.Split(string(p[4]), " ") {
+			if g == symbol {
+				// exact match, return immediately
+				return p[0], nil
+			}
+		}
 		n := strings.Count(line, symbol)
 		if n >= bestHit {
-			p := strings.SplitN(line, "\t", 4)
-			if len(p) < 4 {
-				continue
-			}
-			for _, g := range strings.Split(p[3], " ") {
-				if g == symbol {
-					// exact match, return immediately
-					return p[0], nil
-				}
-			}
 			bestHit = n
 			protID = p[0]
 		}
