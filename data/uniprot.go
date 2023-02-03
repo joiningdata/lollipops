@@ -30,8 +30,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
-	"github.com/AvraamMavridis/randomcolor"
 )
 
 const UniprotDataURL = "https://rest.uniprot.org/uniprotkb/%s.txt"
@@ -111,7 +109,7 @@ func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 		}
 
 		feat := GraphicFeature{
-			Color: randomcolor.GetRandomColorInHex(),
+			Color: fdata[2],
 			Text:  strings.Trim(shortDesc, ". "),
 			Type:  fdata[1],
 			Start: json.Number(fromPos),
