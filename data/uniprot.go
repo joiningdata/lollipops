@@ -168,7 +168,7 @@ func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 	return gd, nil
 }
 
-const UNIPROTRESTURL = "https://rest.uniprot.org/uniprotkb/search?query=%s+AND+reviewed:true+AND+organism_id:9606+AND+database:pfam&columns=id,entry+name,reviewed,genes,organism&format=tsv"
+const UNIPROTRESTURL = "https://rest.uniprot.org/uniprotkb/search?query=%s+AND+reviewed:true+AND+organism_id:9606&columns=id,entry+name,reviewed,genes,organism&format=tsv"
 
 func GetProtID(symbol string) (string, error) {
 	apiURL := fmt.Sprintf(UNIPROTRESTURL, symbol)
