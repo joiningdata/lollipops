@@ -82,7 +82,7 @@ the area is exponentially proportional to the count indicated. Examples:
 #### Alternative input sources:
 
 ```
-  -uniprot                use UniprotKB as an alternative to Pfam for
+  -pfam                   use Pfam legacy as an alternative to uniprot for
                           fetching domain/motif information
   -l=filename.json        use local file instead of Pfam API for graphic data
                             see: http://pfam-legacy.xfam.org/help#tabview=tab9

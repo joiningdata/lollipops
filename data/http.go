@@ -5,10 +5,15 @@ package data
 import (
 	"net/http"
 	"net/url"
+    "crypto/tls"
 )
 
 func httpGet(url string) (*http.Response, error) {
-	return http.Get(url)
+	tr := &http.Transport{
+        TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+    }
+    client := &http.Client{Transport: tr}
+    return client.Get(url)
 }
 
 func httpPostForm(url string, vals url.Values) (*http.Response, error) {
