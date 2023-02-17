@@ -24,7 +24,7 @@ import (
 )
 
 // MotifNames has human-readable names
-//  - mostly from http://pfam-legacy.xfam.org/help#tabview=tab9
+//   - mostly from http://pfam-legacy.xfam.org/help#tabview=tab9
 var MotifNames = map[string]string{
 	"disorder":       "Disordered region",
 	"low_complexity": "Low complexity region",

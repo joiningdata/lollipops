@@ -29,7 +29,7 @@ const PfamGraphicURL = "https://pfam-legacy.xfam.org/protein/%s/graphic"
 
 func GetPfamGraphicData(accession string) (*GraphicResponse, error) {
 	queryURL := fmt.Sprintf(PfamGraphicURL, accession)
-	resp, err := httpGet(queryURL)
+	resp, err := httpGetInsecure(queryURL)
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			fmt.Fprintf(os.Stderr, "Unable to connect to Pfam. Check your internet connection or try again later.")
@@ -47,9 +47,9 @@ func GetPfamGraphicData(accession string) (*GraphicResponse, error) {
 
 	data := []GraphicResponse{}
 	err = json.Unmarshal(respBytes, &data)
-	//if err != nil {
-	//	return nil, err
-	//}
+	if err != nil {
+		return nil, err
+	}
 	if len(data) != 1 {
 		return nil, fmt.Errorf("pfam returned invalid result")
 	}

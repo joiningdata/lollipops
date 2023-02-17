@@ -19,6 +19,7 @@ package data
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -60,13 +61,27 @@ func getValueForKey(line, key string) string {
 	return ""
 }
 
+func uniprotDecompress(respBytes []byte) []byte {
+	// uniprot's REST implementation doesn't set a valid Content-Encoding header when
+	// gzipping the response, so Go's automatic gzip decompression doesn't work.
+	// since they'll probably fix it after put in this workaround, we'll just try
+	// to un-gzip and replace the content if it doesn't fail.
+
+	buf := bytes.NewReader(respBytes)
+	zrdr, err := gzip.NewReader(buf)
+	if err != nil {
+		return respBytes
+	}
+	data, err := io.ReadAll(zrdr)
+	if err == nil {
+		return data
+	}
+	return respBytes
+}
+
 func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 	queryURL := fmt.Sprintf(UniprotDataURL, accession)
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", queryURL, nil)
-	req.Header.Add("Accept-Encoding", "UTF-8")
-	resp, err := client.Do(req)
-
+	resp, err := httpGet(queryURL)
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			fmt.Fprintf(os.Stderr, "Unable to connect to Uniprot. Check your internet connection or try again later.")
@@ -79,6 +94,7 @@ func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+	respBytes = uniprotDecompress(respBytes)
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("pfam error: %s", resp.Status)
 	}
@@ -172,14 +188,7 @@ const UNIPROTRESTURL = "https://rest.uniprot.org/uniprotkb/search?query=%s+AND+r
 
 func GetProtID(symbol string) (string, error) {
 	apiURL := fmt.Sprintf(UNIPROTRESTURL, symbol)
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", apiURL, nil)
-	req.Header.Add("Accept-Encoding", "UTF-8")
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
+	resp, err := http.Get(apiURL)
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			fmt.Fprintf(os.Stderr, "Unable to connect to Uniprot. Check your internet connection or try again later.")
@@ -187,11 +196,12 @@ func GetProtID(symbol string) (string, error) {
 		}
 		return "", err
 	}
-
+	defer resp.Body.Close()
 	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
+	respBytes = uniprotDecompress(respBytes)
 	if resp.StatusCode != 200 {
 		return "", fmt.Errorf("uniprot error: %s", resp.Status)
 	}

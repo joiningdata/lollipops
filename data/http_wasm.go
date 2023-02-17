@@ -1,3 +1,4 @@
+//go:build wasm
 // +build wasm
 
 package data
@@ -22,6 +23,11 @@ func httpGet(url string) (*http.Response, error) {
 	resp.Body.Close()
 	resp.Body = ioutil.NopCloser(strings.NewReader(string(bb)))
 	return resp, err
+}
+
+func httpGetInsecure(url string) (*http.Response, error) {
+	// I am not willing to test if this can be configured in WASM.
+	return httpGet(url)
 }
 
 // implements http.PostForm but makes wasm's fetch work with CORS
