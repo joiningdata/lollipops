@@ -56,6 +56,54 @@ type GraphicResponse struct {
 	Regions  []GraphicFeature `json:"regions"`
 }
 
+type InterProMetaData struct {
+	Accession string `json:"accession"`
+	Name      string `json:"name"`
+	Type      string `json:"type"`
+}
+
+type InterProExtraField struct {
+	ShortName string `json:"short_name"`
+}
+
+type InterProFragment struct {
+	Start      json.Number `json:"start"`
+	End        json.Number `json:"end"`
+	SeqFeature string      `json:"seq_feature"`
+}
+
+type InterProLocation struct {
+	Fragments []InterProFragment `json:"fragments"`
+}
+
+type InterProMatch struct {
+	Locations []InterProLocation `json:"entry_protein_locations"`
+}
+
+type InterProEntry struct {
+	Metadata    InterProMetaData   `json:"metadata"`
+	Matches     []InterProMatch    `json:"proteins"`
+	ExtraFields InterProExtraField `json:"extra_fields"`
+}
+
+type InterProEntryResponse struct {
+	Entries []InterProEntry `json:"results"`
+}
+
+type InterProFeature struct {
+	Accession string             `json:"accession"`
+	Database  string             `json:"source_database"`
+	Locations []InterProLocation `json:"locations"`
+}
+
+type UniProtSequence struct {
+	Length int `json:"length"`
+}
+
+type UniProtResponse struct {
+	Sequence UniProtSequence `json:"sequence"`
+}
+
 func GetLocalGraphicData(filename string) (*GraphicResponse, error) {
 	f, err := os.Open(filename)
 	if err != nil {
