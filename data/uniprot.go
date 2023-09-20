@@ -184,7 +184,7 @@ func GetUniprotGraphicData(accession string) (*GraphicResponse, error) {
 	return gd, nil
 }
 
-const UNIPROTRESTURL = "https://rest.uniprot.org/uniprotkb/search?query=%s+AND+reviewed:true+AND+organism_id:9606&columns=id,entry+name,reviewed,genes,organism&format=tsv"
+const UNIPROTRESTURL = "https://rest.uniprot.org/uniprotkb/search?query=%s+AND+reviewed:true+AND+organism_id:9606&format=tsv&fields=accession,gene_names,length"
 
 func GetProtID(symbol string) (string, error) {
 	apiURL := fmt.Sprintf(UNIPROTRESTURL, symbol)
@@ -208,9 +208,12 @@ func GetProtID(symbol string) (string, error) {
 	nmatches := 0
 	bestHit := 0
 	protID := ""
-	for _, line := range strings.Split(string(respBytes), "\n") {
+	for i, line := range strings.Split(string(respBytes), "\n") {
+		if i == 0 {
+			continue
+		}
 		p := strings.Split(string(line), "\t")
-		for _, g := range strings.Split(string(p[4]), " ") {
+		for _, g := range strings.Split(string(p[1]), " ") {
 			if g == symbol {
 				// exact match, return immediately
 				return p[0], nil
