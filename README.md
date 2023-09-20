@@ -6,8 +6,8 @@
 
 A simple 'lollipop' mutation diagram generator that tries to make things
 simple and easy by automating as much as possible. It uses the
-[UniProt REST API](http://www.uniprot.org/uploadlists/) and/or
-[Pfam API](http://pfam-legacy.xfam.org/help#tabview=tab9) to automate translation
+[UniProt REST API](http://www.uniprot.org/uploadlists/) and
+[InterPro API](https://interpro-documentation.readthedocs.io/en/latest/faq.html#application-programming-interface-api) to automate translation
 of Gene Symbols and lookup domain/motif features for display. If
 variant changes are provided, it will also annotate them to the diagram
 using the "lollipops" markers that give the tool it's name.
@@ -77,15 +77,6 @@ the area is exponentially proportional to the count indicated. Examples:
   -o=filename.png         set output filename (.png or .svg supported)
   -w=700                  set diagram pixel width (default = automatic fit)
   -dpi=300                set DPI (PNG output only)
-```
-
-#### Alternative input sources:
-
-```
-  -pfam                   use Pfam legacy as an alternative to uniprot for
-                          fetching domain/motif information
-  -l=filename.json        use local file instead of Pfam API for graphic data
-                            see: http://pfam-legacy.xfam.org/help#tabview=tab9
 ```
 
 ## Installation
