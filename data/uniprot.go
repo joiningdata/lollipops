@@ -239,6 +239,35 @@ func GetProtID(symbol string) (string, error) {
 	return protID, nil
 }
 
+func GetProtLength(accession string) (int, error) {
+	apiURL := fmt.Sprintf("https://rest.uniprot.org/uniprotkb/%s.json", accession)
+	resp, err := http.Get(apiURL)
+	if err != nil {
+		if err, ok := err.(net.Error); ok && err.Timeout() {
+			fmt.Fprintf(os.Stderr, "Unable to connect to Uniprot. Check your internet connection or try again later.")
+			os.Exit(1)
+		}
+		return 0, err
+	}
+	defer resp.Body.Close()
+	respBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+	respBytes = uniprotDecompress(respBytes)
+	if resp.StatusCode != 200 {
+		return 0, fmt.Errorf("uniprot error: %s", resp.Status)
+	}
+
+	data := UniProtResponse{}
+	err = json.Unmarshal(respBytes, &data)
+	if err != nil {
+		return 0, err
+	}
+
+	return data.Sequence.Length, nil
+}
+
 func GetProtMapping(dbname, geneid string) (string, error) {
 	apiURL := `https://www.uniprot.org/uploadlists/`
 	params := url.Values{
