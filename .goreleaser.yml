@@ -1,10 +1,28 @@
 builds:
-  - goarch:
-      - amd64
-      - arm64
+- binary: lollipops
+  id: lollipops
+  goos:
+  - linux
+  - windows
+  goarch:
+  - amd64
+  - arm64
+
+- binary: lollipops
+  id: lollipops-mac
+  goos:
+  - darwin
+  goarch:
+  - amd64
+  - arm64
 
 universal_binaries:
-  - replace: true
+- replace: true
+  ids:
+  - lollipops-mac
+  name_template: "lollipops"
+  hooks:
+    post: gon gon.hcl
 
 archives:
   - format_overrides:
