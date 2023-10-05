@@ -120,20 +120,7 @@ inputs:
     type: string
     inputBinding:
       prefix: "-o"
-
-  uniprotDomains:
-    doc: "use uniprot domains instead of Pfam"
-    type: boolean?
-    inputBinding:
-      prefix: "-uniprot"
-  localDomainFile:
-    doc: "get domain info from a file"
-    ## see: http://pfam-legacy.xfam.org/help#tabview=tab9
-    type: File?
-    inputBinding:
-      prefix: "-l="
-      separate: false
-    
+   
 outputs:
   image:
     type: File

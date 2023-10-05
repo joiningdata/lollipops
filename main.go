@@ -21,6 +21,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -51,9 +52,6 @@ var (
 	mutColor = flag.String("mut-color", "#ff0000", "color to use for non-synonymous lollipops")
 
 	fontPath = flag.String("f", "", "Path to truetype font to use for drawing (defaults to Arial.ttf)")
-
-	localPath     = flag.String("l", "", "Path to local json graphic data (Pfam response format)")
-	alternateData = flag.Bool("pfam", false, "fetch alternative domain/motif information from Uniprot instead of Pfam")
 )
 
 func main() {
@@ -111,13 +109,6 @@ Output options:
   -o=filename.png         set output filename (.png or .svg supported)
   -w=700                  set diagram pixel width (default = automatic fit)
   -dpi=300                set DPI (PNG output only)
-
-Alternative input sources:
-  -pfam                   use Pfam legacy as an alternative to UniprotKB for
-                          fetching domain/motif information
-  -l=filename.json        use local file instead of Pfam API for graphic data
-                            see: http://pfam-legacy.xfam.org/help#tabview=tab9
-
 `)
 	}
 
@@ -194,22 +185,29 @@ Press Enter/Ctrl-C to quit.`)
 		os.Exit(1)
 	}
 
-	var d *data.GraphicResponse
-	if *localPath != "" {
-		d, err = data.GetLocalGraphicData(*localPath)
-	} else if *alternateData {
-		d, err = data.GetPfamGraphicData(acc)
-	} else {
-		d, err = data.GetUniprotGraphicData(acc)
-	}
+	var d *data.GraphicResponse = &data.GraphicResponse{}
+
+	length, err := data.GetProtLength(acc)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	if geneSymbol == "" {
-		geneSymbol = d.Metadata.Identifier
-		fmt.Fprintln(os.Stderr, "Gene Symbol: ", geneSymbol)
+
+	d.Length = json.Number(fmt.Sprint(length))
+
+	regions, err := data.GetPfamProteinMatches(acc)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
+	d.Regions = regions
+
+	motifs, err := data.GetSequenceFeatures(acc)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	d.Motifs = motifs
 
 	if *output == "" {
 		*output = geneSymbol + ".svg"
