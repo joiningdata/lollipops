@@ -36,6 +36,7 @@ import (
 var (
 	queryDB = flag.String("Q", "GENENAME", "Uniprot query database when -U not used")
 	uniprot = flag.String("U", "", "Uniprot accession instead of GENE_SYMBOL")
+	domains = flag.String("D", "pfam", "source of protein domains (defaults to pfam)")
 	output  = flag.String("o", "", "output SVG/PNG file (default GENE_SYMBOL.svg)")
 	width   = flag.Int("w", 0, "output width (default automatic fit labels)")
 	dpi     = flag.Float64("dpi", 72, "output DPI for PNG rasterization")
@@ -92,6 +93,11 @@ Protein changes:
 
   (N.B. color must come before count in tags)
 
+Protein domains:
+  -D pfam				  set the source of protein domains
+						    "pfam"     = use domains from Pfam
+							"interpro" = use domains from CDD, NCBIfam, Pfam, PROSITE, and SMART
+
 Diagram generation options:
   -legend                 draw a legend for colored regions
   -syn-color="#0000ff"    color to use for synonymous mutation markers
@@ -123,6 +129,7 @@ Output options:
 	drawing.DefaultSettings.SynonymousColor = *synColor
 	drawing.DefaultSettings.MutationColor = *mutColor
 	drawing.DefaultSettings.GraphicWidth = float64(*width)
+	domainsDatabase := strings.ToLower(*domains)
 
 	if *fontPath == "" {
 		err := drawing.LoadDefaultFont()
@@ -140,6 +147,11 @@ Output options:
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+	}
+
+	if domainsDatabase != "pfam" && domainsDatabase != "interpro" {
+		fmt.Fprintln(os.Stderr, "ERROR: Invalid source of protein domains (available: InterPro, Pfam).")
+		os.Exit(1)
 	}
 
 	var err error
@@ -195,7 +207,7 @@ Press Enter/Ctrl-C to quit.`)
 
 	d.Length = json.Number(fmt.Sprint(length))
 
-	regions, err := data.GetPfamProteinMatches(acc)
+	regions, err := data.GetProteinMatches(domainsDatabase, acc)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

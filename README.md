@@ -79,6 +79,15 @@ the area is exponentially proportional to the count indicated. Examples:
   -dpi=300                set DPI (PNG output only)
 ```
 
+#### Domain sources:
+
+```
+  -D pfam                 set the source of protein domains
+                          pfam:     use Pfam domains only
+                          interpro: use representative domains 
+                                    from CDD, NCBIfam, Pfam, PROSITE, and SMART
+```
+
 ## Installation
 
 Head over to the [Releases](https://github.com/joiningdata/lollipops/releases) to
