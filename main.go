@@ -180,6 +180,9 @@ Output options:
 
 	if *uniprot != "" {
 		acc = *uniprot
+		if geneSymbol == "" {
+			geneSymbol = acc
+		}
 	}
 
 	if flag.NArg() == 0 && *uniprot == "" {
