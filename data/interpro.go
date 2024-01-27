@@ -128,7 +128,11 @@ func GetSequenceFeatures(accession string) ([]GraphicFeature, error) {
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode != 200 {
+
+	var gs []GraphicFeature
+	if resp.StatusCode == 204 {
+		return gs, nil
+	} else if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("InterPro error: %s", resp.Status)
 	}
 
@@ -139,7 +143,6 @@ func GetSequenceFeatures(accession string) ([]GraphicFeature, error) {
 		return nil, fmt.Errorf("InterPro error: %s", err)
 	}
 
-	var gs []GraphicFeature
 	featureDatabases := map[string]string{
 		"signalp_e":  "sig_p",
 		"signalp_g+": "sig_p",
