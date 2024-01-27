@@ -60,6 +60,7 @@ type InterProMetaData struct {
 	Accession string `json:"accession"`
 	Name      string `json:"name"`
 	Type      string `json:"type"`
+	Database  string `json:"source_database"`
 }
 
 type InterProExtraField struct {
@@ -67,9 +68,10 @@ type InterProExtraField struct {
 }
 
 type InterProFragment struct {
-	Start      json.Number `json:"start"`
-	End        json.Number `json:"end"`
-	SeqFeature string      `json:"seq_feature"`
+	Start          json.Number `json:"start"`
+	End            json.Number `json:"end"`
+	SeqFeature     string      `json:"seq_feature"`
+	Representative bool        `json:"representative"`
 }
 
 type InterProLocation struct {

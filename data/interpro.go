@@ -26,12 +26,20 @@ import (
 	"sort"
 )
 
-const PfamURL = "https://www.ebi.ac.uk/interpro/api/entry/pfam/protein/uniprot/%s/?extra_fields=short_name&page_size=100"
-const PfamLink = "https://www.ebi.ac.uk/interpro/entry/pfam/%s"
+const InterProURL = "https://www.ebi.ac.uk/interpro/api/entry/%s/protein/uniprot/%s/?extra_fields=short_name&page_size=100"
+const InterProLink = "https://www.ebi.ac.uk/interpro/entry/%s/%s"
 const SequenceFeaturesURL = "https://www.ebi.ac.uk/interpro/api/protein/UniProt/%s/?extra_features=true"
 
-func GetPfamProteinMatches(accession string) ([]GraphicFeature, error) {
-	queryURL := fmt.Sprintf(PfamURL, accession)
+func GetProteinMatches(database string, accession string) ([]GraphicFeature, error) {
+	var sourceDatabase string
+	filterDomains := false
+	if database == "interpro" {
+		sourceDatabase = "all"
+		filterDomains = true
+	} else {
+		sourceDatabase = "pfam"
+	}
+	queryURL := fmt.Sprintf(InterProURL, sourceDatabase, accession)
 	resp, err := httpGet(queryURL)
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
@@ -44,7 +52,11 @@ func GetPfamProteinMatches(accession string) ([]GraphicFeature, error) {
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode != 200 {
+
+	var gs []GraphicFeature
+	if resp.StatusCode == 204 {
+		return gs, nil
+	} else if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("InterPro error: %s", resp.Status)
 	}
 
@@ -54,23 +66,24 @@ func GetPfamProteinMatches(accession string) ([]GraphicFeature, error) {
 		return nil, err
 	}
 
-	var gs []GraphicFeature
 	for _, e := range r.Entries {
 		for _, m := range e.Matches {
 			for _, l := range m.Locations {
 				for _, f := range l.Fragments {
-					gf := GraphicFeature{
-						Text:  e.ExtraFields.ShortName,
-						Type:  e.Metadata.Type,
-						Start: f.Start,
-						End:   f.End,
-						Link:  fmt.Sprintf(PfamLink, e.Metadata.Accession),
-						Metadata: GraphicMetadata{
-							Description: e.Metadata.Name,
-							Identifier:  e.Metadata.Accession,
-						},
+					if !filterDomains || f.Representative {
+						gf := GraphicFeature{
+							Text:  e.ExtraFields.ShortName,
+							Type:  e.Metadata.Type,
+							Start: f.Start,
+							End:   f.End,
+							Link:  fmt.Sprintf(InterProLink, e.Metadata.Database, e.Metadata.Accession),
+							Metadata: GraphicMetadata{
+								Description: e.Metadata.Name,
+								Identifier:  e.Metadata.Accession,
+							},
+						}
+						gs = append(gs, gf)
 					}
-					gs = append(gs, gf)
 				}
 			}
 		}
@@ -115,7 +128,11 @@ func GetSequenceFeatures(accession string) ([]GraphicFeature, error) {
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode != 200 {
+
+	var gs []GraphicFeature
+	if resp.StatusCode == 204 {
+		return gs, nil
+	} else if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("InterPro error: %s", resp.Status)
 	}
 
@@ -126,7 +143,6 @@ func GetSequenceFeatures(accession string) ([]GraphicFeature, error) {
 		return nil, fmt.Errorf("InterPro error: %s", err)
 	}
 
-	var gs []GraphicFeature
 	featureDatabases := map[string]string{
 		"signalp_e":  "sig_p",
 		"signalp_g+": "sig_p",
