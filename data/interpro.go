@@ -52,7 +52,11 @@ func GetProteinMatches(database string, accession string) ([]GraphicFeature, err
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode != 200 {
+
+	var gs []GraphicFeature
+	if resp.StatusCode == 204 {
+		return gs, nil
+	} else if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("InterPro error: %s", resp.Status)
 	}
 
@@ -62,7 +66,6 @@ func GetProteinMatches(database string, accession string) ([]GraphicFeature, err
 		return nil, err
 	}
 
-	var gs []GraphicFeature
 	for _, e := range r.Entries {
 		for _, m := range e.Matches {
 			for _, l := range m.Locations {
