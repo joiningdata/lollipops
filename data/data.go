@@ -68,14 +68,14 @@ type InterProExtraField struct {
 }
 
 type InterProFragment struct {
-	Start          json.Number `json:"start"`
-	End            json.Number `json:"end"`
-	SeqFeature     string      `json:"seq_feature"`
-	Representative bool        `json:"representative"`
+	Start      json.Number `json:"start"`
+	End        json.Number `json:"end"`
+	SeqFeature string      `json:"seq_feature"`
 }
 
 type InterProLocation struct {
-	Fragments []InterProFragment `json:"fragments"`
+	Fragments      []InterProFragment `json:"fragments"`
+	Representative bool               `json:"representative"`
 }
 
 type InterProMatch struct {
