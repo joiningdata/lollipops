@@ -70,7 +70,7 @@ func GetProteinMatches(database string, accession string) ([]GraphicFeature, err
 		for _, m := range e.Matches {
 			for _, l := range m.Locations {
 				for _, f := range l.Fragments {
-					if !filterDomains || f.Representative {
+					if !filterDomains || l.Representative {
 						gf := GraphicFeature{
 							Text:  e.ExtraFields.ShortName,
 							Type:  e.Metadata.Type,
